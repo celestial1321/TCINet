@@ -54,11 +54,9 @@ from cell_segmentation.trainer.trainer_TCINet import TCINetTrainer
 from models.segmentation.cell_segmentation.TCINet import (
     TCINet,
     TCINetSAM,
-    TCINet256,
 )
 from models.segmentation.cell_segmentation.TCINet_shared import (
     TCINetShared,
-    TCINet256Shared,
     TCINetSAMShared,
 )
 from utils.tools import close_logger
@@ -571,9 +569,9 @@ class ExperimentTCINetCoNic(BaseExperiment):
 
         if backbone_type.lower() == "vit256":
             if shared_decoders:
-                model_class = TCINet256Shared
+                model_class =
             else:
-                model_class = TCINet256
+                model_class = 
             model = model_class(
                 model256_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -591,7 +589,7 @@ class ExperimentTCINetCoNic(BaseExperiment):
                 TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
                 self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info("Loaded TCINet256 model")
+            self.logger.info("Loaded  model")
         if backbone_type.lower() in ["sam-b", "sam-l", "sam-h"]:
             if shared_decoders:
                 model_class = TCINetSAMShared

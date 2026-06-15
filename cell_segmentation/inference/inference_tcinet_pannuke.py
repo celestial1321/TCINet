@@ -56,11 +56,9 @@ from cell_segmentation.utils.post_proc_TCINet import calculate_instances
 from cell_segmentation.utils.tools import cropping_center, pair_coordinates
 from models.segmentation.cell_segmentation.TCINet import (
     TCINet,
-    TCINet256,
     TCINetSAM,
 )
 from models.segmentation.cell_segmentation.TCINet_shared import (
-    TCINet256Shared,
     TCINetSAMShared,
     TCINetShared,
 )
@@ -152,8 +150,6 @@ class InferenceTCINet:
     ) -> Union[
         TCINet,
         TCINetShared,
-        TCINet256,
-        TCINet256Shared,
         TCINetSAM,
         TCINetSAMShared,
     ]:
@@ -161,16 +157,16 @@ class InferenceTCINet:
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
+                TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Model
+            Union[TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
             "TCINet",
             "TCINetShared",
-            "TCINet256",
-            "TCINet256Shared",
+            "",
+            "",
             "TCINetSAM",
             "TCINetSAMShared",
         ]
@@ -194,13 +190,6 @@ class InferenceTCINet:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["TCINet256", "TCINet256Shared"]:
-            if model_type == "TCINet256":
-                model_class = TCINet256
-            elif model_type == "TCINet256Shared":
-                model_class = TCINet256Shared
-            model = model_class(
-                model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
@@ -225,8 +214,6 @@ class InferenceTCINet:
         Union[
             TCINet,
             TCINetShared,
-            TCINet256,
-            TCINet256Shared,
             TCINetSAM,
             TCINetSAMShared,
         ],
@@ -239,8 +226,8 @@ class InferenceTCINet:
             test_folds (List[int], optional): Test fold to use. Otherwise defined folds from config.yaml (in run_dir) are loaded. Defaults to None.
 
         Returns:
-            tuple[Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared], DataLoader, dict]:
-                Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Best model loaded form checkpoint
+            tuple[Union[TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared], DataLoader, dict]:
+                Union[TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared]: Best model loaded form checkpoint
                 DataLoader: Inference DataLoader
                 dict: Dataset configuration. Keys are:
                     * "tissue_types": describing the present tissue types with corresponding integer
@@ -311,8 +298,6 @@ class InferenceTCINet:
         model: Union[
             TCINet,
             TCINetShared,
-            TCINet256,
-            TCINet256Shared,
             TCINetSAM,
             TCINetSAMShared,
         ],
@@ -323,7 +308,7 @@ class InferenceTCINet:
         """Run Patch inference with given setup
 
         Args:
-            model (Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]): Model to use for inference
+            model (Union[TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared]): Model to use for inference
             inference_dataloader (DataLoader): Inference Dataloader. Must return a batch with the following structure:
                 * Images (torch.Tensor)
                 * Masks (dict)
@@ -603,8 +588,6 @@ class InferenceTCINet:
         model: Union[
             TCINet,
             TCINetShared,
-            TCINet256,
-            TCINet256Shared,
             TCINetSAM,
             TCINetSAMShared,
         ],

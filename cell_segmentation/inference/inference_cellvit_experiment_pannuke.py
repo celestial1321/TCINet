@@ -65,11 +65,9 @@ from cell_segmentation.utils.post_proc_TCINet import (
 from cell_segmentation.utils.tools import cropping_center, pair_coordinates
 from models.segmentation.cell_segmentation.TCINet import (
     TCINet,
-    TCINet256,
     TCINetSAM,
 )
 from models.segmentation.cell_segmentation.TCINet_shared import (
-    TCINet256Shared,
     TCINetSAMShared,
     TCINetShared,
 )
@@ -139,16 +137,14 @@ class InferenceTCINet:
     ) -> Union[
         TCINet,
         TCINetShared,
-        TCINet256,
-        TCINet256Shared,
         TCINetSAM,
         TCINetSAMShared,
     ]:
         implemented_models = [
             "TCINet",
             "TCINetShared",
-            "TCINet256",
-            "TCINet256Shared",
+            "",
+            "",
             "TCINetSAM",
             "TCINetSAMShared",
         ]
@@ -171,13 +167,6 @@ class InferenceTCINet:
                 extract_layers=self.run_conf["model"]["extract_layers"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
-        elif model_type in ["TCINet256", "TCINet256Shared"]:
-            if model_type == "TCINet256":
-                model_class = TCINet256
-            elif model_type == "TCINet256Shared":
-                model_class = TCINet256Shared
-            model = model_class(
-                model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
@@ -202,8 +191,6 @@ class InferenceTCINet:
         Union[
             TCINet,
             TCINetShared,
-            TCINet256,
-            TCINet256Shared,
             TCINetSAM,
             TCINetSAMShared,
         ],
@@ -270,8 +257,6 @@ class InferenceTCINet:
         model: Union[
             TCINet,
             TCINetShared,
-            TCINet256,
-            TCINet256Shared,
             TCINetSAM,
             TCINetSAMShared,
         ],

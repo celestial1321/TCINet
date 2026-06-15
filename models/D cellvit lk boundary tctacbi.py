@@ -365,27 +365,6 @@ class TCINet(nn.Module):
             p.requires_grad = True
 
 
-class TCINet256(TCINet):
-    def __init__(self, model256_path, num_nuclei_classes, num_tissue_classes,
-                 drop_rate=0, attn_drop_rate=0, drop_path_rate=0, regression_loss=False):
-        self.patch_size=16; self.embed_dim=384; self.depth=12; self.num_heads=6
-        self.mlp_ratio=4; self.qkv_bias=True; self.extract_layers=[3,6,9,12]
-        self.input_channels=3; self.num_tissue_classes=num_tissue_classes
-        self.num_nuclei_classes=num_nuclei_classes
-        super().__init__(num_nuclei_classes=num_nuclei_classes, num_tissue_classes=num_tissue_classes,
-            embed_dim=self.embed_dim, input_channels=self.input_channels, depth=self.depth,
-            num_heads=self.num_heads, extract_layers=self.extract_layers, mlp_ratio=self.mlp_ratio,
-            qkv_bias=self.qkv_bias, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
-            drop_path_rate=drop_path_rate, regression_loss=regression_loss)
-        self.model256_path = model256_path
-
-    def load_pretrained_encoder(self, model256_path):
-        state_dict = torch.load(str(model256_path), map_location="cpu")["teacher"]
-        state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
-        state_dict = {k.replace("backbone.", ""): v for k, v in state_dict.items()}
-        print(f"Loading checkpoint: {self.encoder.load_state_dict(state_dict, strict=False)}")
-
-
 class TCINetSAM(TCINet):
     def __init__(self, model_path, num_nuclei_classes, num_tissue_classes,
                  vit_structure, drop_rate=0, regression_loss=False):

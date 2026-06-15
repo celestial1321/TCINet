@@ -55,15 +55,12 @@ from cell_segmentation.utils.template_geojson import (
 from datamodel.wsi_datamodel import WSI
 from models.segmentation.cell_segmentation.TCINet import (
     TCINet,
-    TCINet256,
     TCINetSAM,
 )
 from models.segmentation.cell_segmentation.TCINet_shared import (
-    TCINet256Shared,
     TCINetSAMShared,
     TCINetShared,
 )
-from preprocessing.encoding.datasets.patched_wsi_inference import PatchedWSIInference
 from utils.file_handling import load_wsi_files_from_csv
 from utils.logger import Logger
 from utils.tools import unflatten_dict, get_size_of_dict
@@ -144,8 +141,6 @@ class CellSegmentationInference:
     ) -> Union[
         TCINet,
         TCINetShared,
-        TCINet256,
-        TCINet256Shared,
         TCINetSAM,
         TCINetSAMShared,
     ]:
@@ -153,16 +148,16 @@ class CellSegmentationInference:
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
+                TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Model
+            Union[TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
             "TCINet",
             "TCINetShared",
-            "TCINet256",
-            "TCINet256Shared",
+            "",
+            "",
             "TCINetSAM",
             "TCINetSAMShared",
         ]
@@ -186,13 +181,6 @@ class CellSegmentationInference:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["TCINet256", "TCINet256Shared"]:
-            if model_type == "TCINet256":
-                model_class = TCINet256
-            elif model_type == "TCINetVIT256Shared":
-                model_class = TCINet256Shared
-            model = model_class(
-                model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),

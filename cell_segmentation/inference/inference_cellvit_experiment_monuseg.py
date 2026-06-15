@@ -55,11 +55,9 @@ from cell_segmentation.utils.post_proc_TCINet import calculate_instances
 from cell_segmentation.utils.tools import pair_coordinates
 from models.TCINet_tacnet_v2 import (
     TCINet,
-    TCINet256,
     TCINetSAM,
 )
 from models.segmentation.cell_segmentation.TCINet_shared import (
-    TCINet256Shared,
     TCINetSAMShared,
     TCINetShared,
 )
@@ -152,8 +150,6 @@ class MoNuSegInference:
     ) -> Union[
         TCINet,
         TCINetShared,
-        TCINet256,
-        TCINet256Shared,
         TCINetSAM,
         TCINetSAMShared,
     ]:
@@ -161,16 +157,16 @@ class MoNuSegInference:
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
+                TCINet, TCINetShared,   TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[TCINet, TCINetShared, TCINet256, TCINetShared, TCINetSAM, TCINetSAMShared]: Model
+            Union[TCINet, TCINetShared,  TCINetShared, TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
             "TCINet",
             "TCINetShared",
-            "TCINet256",
-            "TCINet256Shared",
+            "",
+            "",
             "TCINetSAM",
             "TCINetSAMShared",
         ]
@@ -194,13 +190,6 @@ class MoNuSegInference:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["TCINet256", "TCINet256Shared"]:
-            if model_type == "TCINet256":
-                model_class = TCINet256
-            elif model_type == "TCINet256Shared":
-                model_class = TCINet256Shared
-            model = model_class(
-                model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),

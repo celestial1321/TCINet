@@ -99,22 +99,25 @@ python cell_segmentation/inference/inference_tcinet_pannuke.py \
 ```
 TCINet/
 ├── models/                          # Model definitions
-│   ├── D cellvit lk boundary tctacbi.py   # TCINet (full model with TACBI)
-│   ├── cellvit_tacnet_v2.py         # TACNet v2
+│   ├── D cellvit lk boundary tctacbi.py   # TCINet (full model)
+│   ├── cellvit_tacnet_v2.py         # TACNet v2 (with TSFA)
 │   ├── cellvit-tacnet-v3.py         # TACNet v3
-│   └── segmentation/                # Base network components
+│   ├── A cellvit baseline.py        # Baseline (ablation)
+│   ├── Bc cellvit lkcellblock.py    # + LKCellBlock (ablation)
+│   ├── encoders/                    # SAM ViT encoder
+│   ├── segmentation/                # Base network components
+│   └── utils/                       # Attention, residual blocks
 ├── cell_segmentation/               # Training, inference, metrics
 │   ├── experiments/                 # Experiment runners
 │   ├── inference/                   # Inference scripts
-│   │   └── inference_tcinet_pannuke.py
-│   ├── datasets/                    # PanNuke, CoNSeP, MoNuSeg loaders
-│   ├── trainer/                     # Training loops
+│   ├── datasets/                    # PanNuke, CoNSeP, MoNuSeg
+│   ├── trainer/                     # Training loop
 │   └── utils/                       # Metrics, post-processing
-├── base_ml/                         # ML utilities
+├── base_ml/                         # ML utilities (loss, optim, etc.)
 ├── preprocessing/                   # WSI patch extraction
 ├── configs/                         # Experiment configurations
-├── tacbi_visualization/             # TACBI attention visualizations
-└── docs/                            # Documentation figures
+├── datamodel/                       # Data model definitions
+└── utils/                           # Logging, file handling
 ```
 
 ---
