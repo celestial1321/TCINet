@@ -73,7 +73,7 @@ python preprocessing/patch_extraction/main_extraction.py \
 ### Training
 
 ```bash
-python cell_segmentation/run_cellvit.py \
+python cell_segmentation/run_tcinet.py \
     --config "configs/Ablation with boundary fold0.yaml"
 ```
 
@@ -99,11 +99,11 @@ python cell_segmentation/inference/inference_tcinet_pannuke.py \
 ```
 TCINet/
 ├── models/                          # Model definitions
-│   ├── D cellvit lk boundary tctacbi.py   # TCINet (full model)
-│   ├── cellvit_tacnet_v2.py         # TACNet v2 (with TSFA)
-│   ├── cellvit-tacnet-v3.py         # TACNet v3
-│   ├── A cellvit baseline.py        # Baseline (ablation)
-│   ├── Bc cellvit lkcellblock.py    # + LKCellBlock (ablation)
+│   ├── D tcinet lk boundary tctacbi.py   # TCINet (full model)
+│   ├── tcinet_tacnet_v2.py         # TACNet v2 (with TSFA)
+│   ├── tcinet-tacnet-v3.py         # TACNet v3
+│   ├── A tcinet baseline.py        # Baseline (ablation)
+│   ├── Bc tcinet lkcellblock.py    # + LKCellBlock (ablation)
 │   ├── encoders/                    # SAM ViT encoder
 │   ├── segmentation/                # Base network components
 │   └── utils/                       # Attention, residual blocks
