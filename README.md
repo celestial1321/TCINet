@@ -33,6 +33,10 @@ TCINet uses a Vision Transformer encoder (SAM-H) with a multi-branch decoder:
 
 TC-TACBI sits between the three decoder branches, routing information asymmetrically. A tissue-type classifier provides the global context signal that dynamically scales each interaction path.
 
+## Abstract
+
+Accurate quantification of cell nuclei in hematoxylin and eosin (H&E) stained tissue sections underpins tumor grading, prognosis, and biomarker discovery in computational pathology. Yet existing multi-branch architectures share identical feature representations across all prediction branches, ignoring the biological variety found in different tissue microenvironments. We propose the Tissue-Conditioned Adaptive Cross-Branch Interaction Network (TCINet), a single-stage regression model that introduces task-conditional structured information routing across prediction branches. TC-TACBI dynamically controls three asymmetric cross-branch paths using a global tissue context signal, while a Task-Specific Feature Adapter (TSFA) provides the adaptive feature specialization at skip connections that makes this interaction discriminative: each branch enters TC-TACBI carrying geometrically distinct representations rather than homogeneous shared features. On the PanNuke dataset under standard three-fold cross-validation, TCINet achieves state-of-the-art performance with mPQ = 0.519 and bPQ = 0.692, both the highest reported values among all published methods. Notably, Dead nuclei PQ reaches 0.197, a 14.5% improvement over the previous best, the highest on record. Zero-shot tests on MoNuSeg and CoNSeP confirm generalization across staining protocols, supporting deployment in clinical digital pathology pipelines. Code is available at https://github.com/celestial1321/TCINet.
+
 ---
 
 ## Installation
