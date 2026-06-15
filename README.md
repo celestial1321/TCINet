@@ -99,12 +99,7 @@ python cell_segmentation/inference/inference_tcinet_pannuke.py \
 ```
 TCINet/
 ├── models/                          # Model definitions
-│   ├── D tcinet lk boundary tctacbi.py   # TCINet (full model)
-│   ├── tcinet_tacnet_v2.py         # TACNet v2 (with TSFA)
-│   ├── tcinet-tacnet-v3.py         # TACNet v3
-│   ├── A tcinet baseline.py        # Baseline (ablation)
-│   ├── Bc tcinet lkcellblock.py    # + LKCellBlock (ablation)
-│   ├── encoders/                    # SAM ViT encoder
+│   │   │   │   │   │   ├── tcinet.py                    # TCINet model (SAM-H backbone)\r?\n├── tcinet_shared.py             # Shared decoder variant\r?\n├── encoders/                    # SAM ViT encoder
 │   ├── segmentation/                # Base network components
 │   └── utils/                       # Attention, residual blocks
 ├── cell_segmentation/               # Training, inference, metrics
