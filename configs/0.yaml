@@ -1,4 +1,4 @@
-# TACNet v2 config - 强化边界监督版
+﻿# TACNet v2 config - 强化边界监督版
 # 相比原版改动：
 #   boundary_weight: 5.0 → 8.0  （边界像素惩罚更强，直接优化bPQ）
 #   boundary_bce weight: 0.8 → 1.2  （边界loss在总loss中比重提高）
@@ -6,11 +6,11 @@
 
 logging:
   mode: "offline"
-  project: "CellViT-PanNuke-Ablation"
+  project: "TCINet-PanNuke-Ablation"
   notes: "TCINet v2 stronger boundary supervision"
-  log_comment: "cellvit_tacnet_v2_bw8_fold0"
+  log_comment: "TCINet_tacnet_v2_bw8_fold0"
   tags:
-    - "CellViT"
+    - "TCINet"
     - "PanNuke"
     - "SAM-H"
     - "boundary_weight_8"
@@ -27,7 +27,7 @@ gpu: 0
 
 data:
   dataset: "PanNuke"
-  dataset_path: "/root/autodl-tmp/CellViT-main/cell_segmentation/datasets/PanNuke_pre"
+  dataset_path: "/root/autodl-tmp/TCINet-main/cell_segmentation/datasets/PanNuke_pre"
   train_folds: [1, 2]
   val_folds: [0]
   test_folds: null
@@ -37,7 +37,7 @@ data:
 
 model:
   backbone: "SAM-H"
-  pretrained_encoder: "/root/autodl-tmp/CellViT-main/models/pretrained/SAM/sam_vit_h.pth"
+  pretrained_encoder: "/root/autodl-tmp/TCINet-main/models/pretrained/SAM/sam_vit_h.pth"
   pretrained: null
   embed_dim: 1280
   input_channels: 3

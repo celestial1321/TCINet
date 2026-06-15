@@ -1,16 +1,16 @@
-logging:
+﻿logging:
   mode: offline
-  project: CellViT-PanNuke-Repro
+  project: TCINet-PanNuke-Repro
   notes: Ablation study fold0 - no boundary loss (A/B group)
   log_comment: ablation_no_boundary_fold0
   tags:
-    - CellViT
+    - TCINet
     - PanNuke
     - SAM-H
     - ablation
     - fold0
-  wandb_dir: /root/autodl-tmp/CellViT-main1/wandb
-  log_dir: /root/autodl-tmp/CellViT-main1/logs
+  wandb_dir: /root/autodl-tmp/TCINet-main1/wandb
+  log_dir: /root/autodl-tmp/TCINet-main1/logs
   level: info
   log_images: false
   group: ablation_fold0
@@ -20,7 +20,7 @@ gpu: 0
 
 data:
   dataset: PanNuke
-  dataset_path: /root/autodl-tmp/CellViT-main/cell_segmentation/datasets/PanNuke_pre
+  dataset_path: /root/autodl-tmp/TCINet-main/cell_segmentation/datasets/PanNuke_pre
   train_folds:
     - 1
     - 2
@@ -33,7 +33,7 @@ data:
 
 model:
   backbone: SAM-H
-  pretrained_encoder: /root/autodl-tmp/CellViT-main/models/pretrained/SAM/sam_vit_h.pth
+  pretrained_encoder: /root/autodl-tmp/TCINet-main/models/pretrained/SAM/sam_vit_h.pth
   pretrained: null
   embed_dim: 1280
   input_channels: 3

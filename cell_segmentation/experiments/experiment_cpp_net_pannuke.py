@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # CPP-Net Experiment Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -25,17 +25,17 @@ from torchinfo import summary
 
 from base_ml.base_loss import retrieve_loss_fn
 from cell_segmentation.experiments.experiment_stardist_pannuke import (
-    ExperimentCellViTStarDist,
+    ExperimentTCINetStarDist,
 )
-from cell_segmentation.trainer.trainer_cpp_net import CellViTCPPTrainer
-from models.segmentation.cell_segmentation.cellvit_cpp_net import (
-    CellViT256CPP,
-    CellViTCPP,
-    CellViTSAMCPP,
+from cell_segmentation.trainer.trainer_cpp_net import TCINetCPPTrainer
+from models.segmentation.cell_segmentation.TCINet_cpp_net import (
+    TCINet256CPP,
+    TCINetCPP,
+    TCINetSAMCPP,
 )
 
 
-class ExperimentCellViTCPP(ExperimentCellViTStarDist):
+class ExperimentTCINetCPP(ExperimentTCINetStarDist):
     def get_loss_fn(self, loss_fn_settings: dict) -> dict:
         """Create a dictionary with loss functions for all branches
 
@@ -52,7 +52,7 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
 
             If a branch is not provided, the defaults settings (described below) are used.
 
-            For further information, please have a look at the file configs/examples/cell_segmentation/train_cellvit.yaml
+            For further information, please have a look at the file configs/examples/cell_segmentation/train_TCINet.yaml
             under the section "loss"
 
             Example:
@@ -174,7 +174,7 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
         shared_decoders: bool = False,
         **kwargs,
     ) -> nn.Module:
-        """Return the CellViTStarDist training model
+        """Return the TCINetStarDist training model
 
         Args:
             pretrained_encoder (Union[Path, str]): Path to a pretrained encoder. Defaults to None.
@@ -206,7 +206,7 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
                     "Shared decoders are not implemented for StarDist"
                 )
             else:
-                model_class = CellViTCPP
+                model_class = TCINetCPP
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -223,11 +223,11 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
 
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model)
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
-                self.logger.info("Loaded CellViT model")
+                TCINet_pretrained = torch.load(pretrained_model)
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
+                self.logger.info("Loaded TCINet model")
 
         if backbone_type.lower() == "vit256":
             if shared_decoders:
@@ -235,7 +235,7 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
                     "Shared decoders are not implemented for StarDist"
                 )
             else:
-                model_class = CellViT256CPP
+                model_class = TCINet256CPP
             model = model_class(
                 model256_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -248,19 +248,19 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
             model.load_pretrained_encoder(model.model256_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info("Loaded CellVit256 model")
+            self.logger.info("Loaded TCINet256 model")
         if backbone_type.lower() in ["sam-b", "sam-l", "sam-h"]:
             if shared_decoders:
                 raise NotImplementedError(
                     "Shared decoders are not implemented for StarDist"
                 )
             else:
-                model_class = CellViTSAMCPP
+                model_class = TCINetSAMCPP
             model = model_class(
                 model_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -272,12 +272,12 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
             model.load_pretrained_encoder(model.model_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info(f"Loaded CellViT-SAM model with backbone: {backbone_type}")
+            self.logger.info(f"Loaded TCINet-SAM model with backbone: {backbone_type}")
 
         self.logger.info(f"\nModel: {model}")
         model = model.to("cpu")
@@ -293,4 +293,4 @@ class ExperimentCellViTCPP(ExperimentCellViTStarDist):
         Returns:
             BaseTrainer: Trainer
         """
-        return CellViTCPPTrainer
+        return TCINetCPPTrainer

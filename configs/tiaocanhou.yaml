@@ -1,4 +1,4 @@
-# 消融实验 config - 有 BoundaryLoss（C、D、E、F 组）
+﻿# 消融实验 config - 有 BoundaryLoss（C、D、E、F 组）
 # C 组：LKCellBlock + BoundaryLoss
 # D 组：+ TACBI v1（固定 alpha）
 # E 组：+ TSFA
@@ -6,11 +6,11 @@
 
 logging:
   mode: "offline"
-  project: "CellViT-PanNuke-Ablation"
+  project: "TCINet-PanNuke-Ablation"
   notes: "Ablation study fold0 - with boundary loss"
   log_comment: "ablation_with_boundary_fold0"
   tags:
-    - "CellViT"
+    - "TCINet"
     - "PanNuke"
     - "SAM-H"
     - "ablation"
@@ -27,7 +27,7 @@ gpu: 0
 
 data:
   dataset: "PanNuke"
-  dataset_path: "/root/autodl-tmp/CellViT-main/cell_segmentation/datasets/PanNuke_pre"
+  dataset_path: "/root/autodl-tmp/TCINet-main/cell_segmentation/datasets/PanNuke_pre"
   train_folds: [1, 2]
   val_folds: [0]
   test_folds: null
@@ -37,7 +37,7 @@ data:
 
 model:
   backbone: "SAM-H"
-  pretrained_encoder: "/root/autodl-tmp/CellViT-main/models/pretrained/SAM/sam_vit_h.pth"
+  pretrained_encoder: "/root/autodl-tmp/TCINet-main/models/pretrained/SAM/sam_vit_h.pth"
   pretrained: null
   embed_dim: 1280
   input_channels: 3

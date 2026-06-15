@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT networks and adaptions, with shared encoders
+﻿# -*- coding: utf-8 -*-
+# TCINet networks and adaptions, with shared encoders
 #
 # UNETR paper and code: https://github.com/tamasino52/UNETR
 # SAM paper and code: https://segment-anything.com/
@@ -16,12 +16,12 @@ from typing import List, Literal, Union
 import torch
 import torch.nn as nn
 
-from .cellvit import CellViT
-from .utils import Conv2DBlock, Deconv2DBlock, ViTCellViT, ViTCellViTDeit
+from .TCINet import TCINet
+from .utils import Conv2DBlock, Deconv2DBlock, ViTTCINet, ViTTCINetDeit
 
 
-class CellViTShared(CellViT, nn.Module):
-    """CellViT Modell for cell segmentation. U-Net like network with vision transformer as backbone encoder
+class TCINetShared(TCINet, nn.Module):
+    """TCINet Modell for cell segmentation. U-Net like network with vision transformer as backbone encoder
 
     All heads are shared, just final layers are not shared
 
@@ -86,7 +86,7 @@ class CellViTShared(CellViT, nn.Module):
         self.drop_path_rate = drop_path_rate
         self.regression_loss = regression_loss
 
-        self.encoder = ViTCellViT(
+        self.encoder = ViTTCINet(
             patch_size=self.patch_size,
             num_classes=self.num_tissue_classes,
             embed_dim=self.embed_dim,
@@ -330,8 +330,8 @@ class CellViTShared(CellViT, nn.Module):
         return decoder
 
 
-class CellViT256Shared(CellViTShared):
-    """CellViT with ViT-256 backbone settings (https://github.com/mahmoodlab/HIPT/blob/master/HIPT_4K/Checkpoints/vit256_small_dino.pth)
+class TCINet256Shared(TCINetShared):
+    """TCINet with ViT-256 backbone settings (https://github.com/mahmoodlab/HIPT/blob/master/HIPT_4K/Checkpoints/vit256_small_dino.pth)
 
     All heads are shared, just final layers are not shared
 
@@ -393,8 +393,8 @@ class CellViT256Shared(CellViTShared):
         print(f"Loading checkpoint: {msg}")
 
 
-class CellViTSAMShared(CellViTShared):
-    """CellViT with SAM backbone settings
+class TCINetSAMShared(TCINetShared):
+    """TCINet with SAM backbone settings
 
     All heads are shared, just final layers are not shared
 
@@ -450,7 +450,7 @@ class CellViTSAMShared(CellViTShared):
 
         self.prompt_embed_dim = 256
 
-        self.encoder = ViTCellViTDeit(
+        self.encoder = ViTTCINetDeit(
             extract_layers=self.extract_layers,
             depth=self.depth,
             embed_dim=self.embed_dim,

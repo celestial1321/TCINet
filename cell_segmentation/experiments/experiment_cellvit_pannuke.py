@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellVit Experiment Class
+﻿# -*- coding: utf-8 -*-
+# TCINet Experiment Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
 # Institute for Artifical Intelligence in Medicine,
@@ -51,21 +51,21 @@ from base_ml.base_loss import retrieve_loss_fn
 from base_ml.base_trainer import BaseTrainer
 from cell_segmentation.datasets.base_cell import CellDataset
 from cell_segmentation.datasets.dataset_coordinator import select_dataset
-from cell_segmentation.trainer.trainer_cellvit import CellViTTrainer
-from models.segmentation.cell_segmentation.cellvit import (
-    CellViT,
-    CellViTSAM,
-    CellViT256,
+from cell_segmentation.trainer.trainer_TCINet import TCINetTrainer
+from models.segmentation.cell_segmentation.TCINet import (
+    TCINet,
+    TCINetSAM,
+    TCINet256,
 )
-from models.segmentation.cell_segmentation.cellvit_shared import (
-    CellViTShared,
-    CellViT256Shared,
-    CellViTSAMShared,
+from models.segmentation.cell_segmentation.TCINet_shared import (
+    TCINetShared,
+    TCINet256Shared,
+    TCINetSAMShared,
 )
 from utils.tools import close_logger
 
 
-class ExperimentCellVitPanNuke(BaseExperiment):
+class ExperimentTCINetPanNuke(BaseExperiment):
     def __init__(self, default_conf: dict, checkpoint=None) -> None:
         super().__init__(default_conf, checkpoint)
         self.load_dataset_setup(dataset_path=self.default_conf["data"]["dataset_path"])
@@ -295,7 +295,7 @@ class ExperimentCellVitPanNuke(BaseExperiment):
 
             If a branch is not provided, the defaults settings (described below) are used.
 
-            For further information, please have a look at the file configs/examples/cell_segmentation/train_cellvit.yaml
+            For further information, please have a look at the file configs/examples/cell_segmentation/train_TCINet.yaml
             under the section "loss"
 
             Example:
@@ -413,7 +413,7 @@ class ExperimentCellVitPanNuke(BaseExperiment):
         return loss_fn_dict
 
     def get_scheduler(self, scheduler_type: str, optimizer: Optimizer) -> _LRScheduler:
-        """Get the learning rate scheduler for CellViT
+        """Get the learning rate scheduler for TCINet
 
         The configuration of the scheduler is given in the "training" -> "scheduler" section.
         Currenlty, "constant", "exponential" and "cosine" schedulers are implemented.
@@ -539,8 +539,8 @@ class ExperimentCellVitPanNuke(BaseExperiment):
         shared_decoders: bool = False,
         regression_loss: bool = False,
         **kwargs,
-    ) -> CellViT:
-        """Return the CellViT training model
+    ) -> TCINet:
+        """Return the TCINet training model
 
         Args:
             pretrained_encoder (Union[Path, str]): Path to a pretrained encoder. Defaults to None.
@@ -550,7 +550,7 @@ class ExperimentCellVitPanNuke(BaseExperiment):
             regression_loss (bool, optional): If regression loss is used. Defaults to False
 
         Returns:
-            CellViT: CellViT training model with given setup
+            TCINet: TCINet training model with given setup
         """
         # reseed needed, due to subprocess seeding compatibility
         self.seed_run(self.default_conf["random_seed"])
@@ -563,9 +563,9 @@ class ExperimentCellVitPanNuke(BaseExperiment):
             )
         if backbone_type.lower() == "default":
             if shared_decoders:
-                model_class = CellViTShared
+                model_class = TCINetShared
             else:
-                model_class = CellViT
+                model_class = TCINet
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -582,17 +582,17 @@ class ExperimentCellVitPanNuke(BaseExperiment):
 
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model)
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
-                self.logger.info("Loaded CellViT model")
+                TCINet_pretrained = torch.load(pretrained_model)
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
+                self.logger.info("Loaded TCINet model")
 
         if backbone_type.lower() == "vit256":
             if shared_decoders:
-                model_class = CellViT256Shared
+                model_class = TCINet256Shared
             else:
-                model_class = CellViT256
+                model_class = TCINet256
             model = model_class(
                 model256_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -605,17 +605,17 @@ class ExperimentCellVitPanNuke(BaseExperiment):
             model.load_pretrained_encoder(model.model256_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info("Loaded CellVit256 model")
+            self.logger.info("Loaded TCINet256 model")
         if backbone_type.lower() in ["sam-b", "sam-l", "sam-h"]:
             if shared_decoders:
-                model_class = CellViTSAMShared
+                model_class = TCINetSAMShared
             else:
-                model_class = CellViTSAM
+                model_class = TCINetSAM
             model = model_class(
                 model_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -627,12 +627,12 @@ class ExperimentCellVitPanNuke(BaseExperiment):
             model.load_pretrained_encoder(model.model_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info(f"Loaded CellViT-SAM model with backbone: {backbone_type}")
+            self.logger.info(f"Loaded TCINet-SAM model with backbone: {backbone_type}")
 
         self.logger.info(f"\nModel: {model}")
         model = model.to("cpu")
@@ -659,7 +659,7 @@ class ExperimentCellVitPanNuke(BaseExperiment):
                 scale_color: 0.1
 
         For further information on how to setup the dictionary and default (recommended) values is given here:
-        configs/examples/cell_segmentation/train_cellvit.yaml
+        configs/examples/cell_segmentation/train_TCINet.yaml
 
         Training Transformations:
             Implemented are:
@@ -845,4 +845,4 @@ class ExperimentCellVitPanNuke(BaseExperiment):
         Returns:
             BaseTrainer: Trainer
         """
-        return CellViTTrainer
+        return TCINetTrainer

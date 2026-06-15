@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # CPP Trainer Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -18,22 +18,22 @@ from matplotlib import pyplot as plt
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from base_ml.base_early_stopping import EarlyStopping
-from models.segmentation.cell_segmentation.cellvit_cpp_net import (
+from models.segmentation.cell_segmentation.TCINet_cpp_net import (
     DataclassCPPStorage,
 )
 
-from cell_segmentation.trainer.trainer_stardist import CellViTStarDistTrainer
-from models.segmentation.cell_segmentation.cellvit import CellViT
+from cell_segmentation.trainer.trainer_stardist import TCINetStarDistTrainer
+from models.segmentation.cell_segmentation.TCINet import TCINet
 
 # import warnings
 # warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-class CellViTCPPTrainer(CellViTStarDistTrainer):
-    """CellViTCPP trainer class
+class TCINetCPPTrainer(TCINetStarDistTrainer):
+    """TCINetCPP trainer class
 
     Args:
-        model (CellViTCPP): CellViTCPP model that should be trained
+        model (TCINetCPP): TCINetCPP model that should be trained
         loss_fn_dict (dict): Dictionary with loss functions for each branch with a dictionary of loss functions.
             Name of branch as top-level key, followed by a dictionary with loss name, loss fn and weighting factor
             Example:
@@ -68,7 +68,7 @@ class CellViTCPPTrainer(CellViTStarDistTrainer):
 
     def __init__(
         self,
-        model: CellViT,
+        model: TCINet,
         loss_fn_dict: dict,
         optimizer: Optimizer,
         scheduler: _LRScheduler,

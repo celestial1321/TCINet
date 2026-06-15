@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT networks and adaptions based on StarDist, with shared encoders
+﻿# -*- coding: utf-8 -*-
+# TCINet networks and adaptions based on StarDist, with shared encoders
 #
 # UNETR paper and code: https://github.com/tamasino52/UNETR
 # SAM paper and code: https://segment-anything.com/
@@ -21,12 +21,12 @@ import torch.nn as nn
 
 from cell_segmentation.utils.post_proc_stardist import StarDistPostProcessor
 
-from .cellvit import CellViT, CellViT256, CellViTSAM
-from .utils import Conv2DBlock, Deconv2DBlock, ViTCellViT, ViTCellViTDeit
+from .TCINet import TCINet, TCINet256, TCINetSAM
+from .utils import Conv2DBlock, Deconv2DBlock, ViTTCINet, ViTTCINetDeit
 
 
-class CellViTStarDistShared(CellViT):
-    """CellViT Modell with StarDist heads (shared decoder).
+class TCINetStarDistShared(TCINet):
+    """TCINet Modell with StarDist heads (shared decoder).
 
     All heads are shared, just final layers are not shared
 
@@ -69,7 +69,7 @@ class CellViTStarDistShared(CellViT):
         attn_drop_rate: float = 0,
         drop_path_rate: float = 0,
     ):
-        super(CellViT, self).__init__()
+        super(TCINet, self).__init__()
         assert len(extract_layers) == 4, "Please provide 4 layers for skip connections"
 
         self.patch_size = 16
@@ -88,7 +88,7 @@ class CellViTStarDistShared(CellViT):
         self.nrays = nrays
         self.prompt_embed_dim = 256
 
-        self.encoder = ViTCellViT(
+        self.encoder = ViTTCINet(
             patch_size=self.patch_size,
             num_classes=self.num_tissue_classes,
             embed_dim=self.embed_dim,
@@ -371,8 +371,8 @@ class CellViTStarDistShared(CellViT):
         return torch.stack(instance_preds), type_preds, torch.stack(instance_type_preds)
 
 
-class CellViT256StarDistShared(CellViTStarDistShared, CellViT256):
-    """CellViT Modell with StarDist heads (shared decoder)
+class TCINet256StarDistShared(TCINetStarDistShared, TCINet256):
+    """TCINet Modell with StarDist heads (shared decoder)
     with ViT-256 backbone settings (https://github.com/mahmoodlab/HIPT/blob/master/HIPT_4K/Checkpoints/vit256_small_dino.pth)
 
     Skip connections and encoder up to last layer are shared between branches
@@ -434,8 +434,8 @@ class CellViT256StarDistShared(CellViTStarDistShared, CellViT256):
         self.model256_path = model256_path
 
 
-class CellViTSAMStarDistShared(CellViTStarDistShared, CellViTSAM):
-    """CellViT Modell with StarDist heads (shared decoder) with SAM backbone settings
+class TCINetSAMStarDistShared(TCINetStarDistShared, TCINetSAM):
+    """TCINet Modell with StarDist heads (shared decoder) with SAM backbone settings
 
     Skip connections and encoder up to last layer are shared between branches
 
@@ -495,7 +495,7 @@ class CellViTSAMStarDistShared(CellViTStarDistShared, CellViTSAM):
 
         self.prompt_embed_dim = 256
 
-        self.encoder = ViTCellViTDeit(
+        self.encoder = ViTTCINetDeit(
             extract_layers=self.extract_layers,
             depth=self.depth,
             embed_dim=self.embed_dim,

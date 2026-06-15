@@ -4,8 +4,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=Pytorch&logoColor=white)](https://pytorch.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![arXiv](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
@@ -13,40 +12,26 @@
 
 ## Overview
 
-**TCINet** is a single-stage regression model for nuclei instance segmentation in H&E stained whole-slide images. It introduces **task-conditional structured information routing** across prediction branches via two key innovations:
+**TCINet** is a single-stage regression model for nuclei instance segmentation in H&E stained whole-slide images. TCINet introduces **task-conditional structured information routing** across prediction branches—a departure from conventional multi-branch architectures that share identical features across all tasks.
 
-- **TC-TACBI** (Tissue-Conditioned Adaptive Cross-Branch Interaction): Dynamically routes information across three prediction branches (Nucleus Presence, HV Maps, Nucleus Type) through asymmetric paths, with routing strength conditioned on a global tissue-type signal.
-- **TSFA** (Task-Specific Feature Adapter): Lightweight residual bottleneck at decoder skip connections that produces branch-specific feature representations before cross-branch interaction.
+### Key Innovations
 
-### Key Results on PanNuke (3-fold CV)
+- **TC-TACBI** (Tissue-Conditioned Adaptive Cross-Branch Interaction): Three asymmetric cross-branch paths (HV→NP spatial attention, NP→HV spatial gating, (NP,HV)→NT channel attention) dynamically scaled by a tissue-type MLP. Unlike symmetric cross-stitch or NDDR-style sharing, TC-TACBI routes information conditionally based on tissue context.
+- **TSFA** (Task-Specific Feature Adapter): Lightweight residual bottleneck at decoder skip connections that produces branch-specific representations *before* cross-branch interaction begins, ensuring each branch enters TC-TACBI with geometrically distinct signals.
+- **LKCellBlock**: Large-kernel depthwise convolution blocks that expand the receptive field for improved boundary delineation.
+- **Boundary-Weighted BCE Loss**: Dynamically weights the loss at nuclear boundaries for sharper instance separation.
 
-| Metric | Value | Rank |
-|--------|-------|------|
-| **mPQ** | 0.519 | #1 among all published methods |
-| **bPQ** | 0.692 | #1 among all published methods |
-| **Dead PQ** | 0.197 | Highest on record (14.5% improvement) |
+### Architecture
 
-Zero-shot tests on **MoNuSeg** (F1,d = 0.876) and **CoNSeP** confirm strong generalization.
+TCINet uses a Vision Transformer encoder (SAM-H) with a multi-branch decoder:
 
----
+| Branch | Task |
+|--------|------|
+| **NP** | Nucleus Presence — binary nuclei segmentation |
+| **HV** | Horizontal-Vertical distance maps — instance separation |
+| **NT** | Nucleus Type — 6-class nuclei classification |
 
-## Architecture
-
-<p align="center">
-  <em>TCINet architecture with TC-TACBI cross-branch interaction module</em>
-</p>
-
-TCINet builds on the CellViT backbone with three decoder branches:
-- **NP** (Nucleus Presence): Binary nuclei segmentation
-- **HV** (Horizontal-Vertical): Distance map regression for instance separation
-- **NT** (Nucleus Type): Multi-class nuclei classification
-
-TC-TACBI introduces three **asymmetric cross-branch paths**:
-1. HV -> NP: Spatial attention gating
-2. NP -> HV: Spatial gating
-3. (NP, HV) -> NT: Channel attention with pooled spatial context
-
-Each path is dynamically scaled by a **tissue-type MLP** at inference time.
+TC-TACBI sits between the three decoder branches, routing information asymmetrically. A tissue-type classifier provides the global context signal that dynamically scales each interaction path.
 
 ---
 
@@ -59,7 +44,6 @@ Each path is dynamically scaled by a **tissue-type MLP** at inference time.
 - CUDA 11.8+ (recommended)
 
 ```bash
-# Clone the repository
 git clone https://github.com/celestial1321/TCINet.git
 cd TCINet
 
@@ -77,44 +61,36 @@ pip install -r requirements.txt
 
 ### Data Preparation
 
-TCINet uses the **PanNuke** dataset for training and supports **MoNuSeg** and **CoNSeP** for evaluation.
+Download and preprocess the PanNuke dataset:
 
-1. Download PanNuke from [here](https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke)
-2. Preprocess using the provided script:
 ```bash
-python preprocessing/patch_extraction/main_extraction.py --config configs/examples/preprocessing/patch_extraction/patch_extraction.yaml
+# 1. Download PanNuke from https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke
+# 2. Preprocess patches
+python preprocessing/patch_extraction/main_extraction.py \
+    --config configs/examples/preprocessing/patch_extraction/patch_extraction.yaml
 ```
 
 ### Training
 
 ```bash
-# Train TCINet on PanNuke (Fold 0)
 python cell_segmentation/run_cellvit.py \
-    --config "configs/Ablation with boundary fold0.yaml" \
-    --model "models/D cellvit lk boundary tctacbi.py"
+    --config "configs/Ablation with boundary fold0.yaml"
 ```
 
-Key training settings:
-- Backbone: SAM-H (ViT-H encoder)
+Key training configuration:
+- Backbone: SAM-H (ViT-H)
 - Input size: 256 x 256
-- Batch size: 8 (with gradient accumulation x2)
+- Batch size: 8 (gradient accumulation x2)
 - Epochs: 130
 - Optimizer: AdamW (lr=3e-4, weight_decay=1e-4)
-- Mixed precision: Yes
 
 ### Inference
 
 ```bash
-# TCINet inference on PanNuke
 python cell_segmentation/inference/inference_tcinet_pannuke.py \
     --model /path/to/checkpoint.pth \
-    --gpu 0 \
-    --dataset PanNuke
+    --gpu 0
 ```
-
-### Model Checkpoints
-
-Pretrained TCINet checkpoints will be released upon paper acceptance.
 
 ---
 
@@ -122,75 +98,53 @@ Pretrained TCINet checkpoints will be released upon paper acceptance.
 
 ```
 TCINet/
-├── models/                     # Model definitions
-│   ├── D cellvit lk boundary tctacbi.py  # TCINet (full model)
-│   ├── cellvit_tacnet_v2.py    # TACNet v2 variant
-│   ├── cellvit-tacnet-v3.py    # TACNet v3 variant
-│   └── segmentation/           # Base segmentation models
-├── cell_segmentation/          # Training & inference
-│   ├── experiments/            # Experiment runners
-│   ├── inference/              # Inference scripts
+├── models/                          # Model definitions
+│   ├── D cellvit lk boundary tctacbi.py   # TCINet (full model with TACBI)
+│   ├── cellvit_tacnet_v2.py         # TACNet v2
+│   ├── cellvit-tacnet-v3.py         # TACNet v3
+│   └── segmentation/                # Base network components
+├── cell_segmentation/               # Training, inference, metrics
+│   ├── experiments/                 # Experiment runners
+│   ├── inference/                   # Inference scripts
 │   │   └── inference_tcinet_pannuke.py
-│   ├── datasets/               # Data loaders (PanNuke, CoNSeP, MoNuSeg)
-│   └── utils/                  # Metrics, post-processing
-├── base_ml/                    # Training utilities
-├── preprocessing/              # Patch extraction & preprocessing
-├── configs/                    # Training configurations
-│   └── Ablation with boundary fold0.yaml  # TCINet config
-├── tacbi_visualization/        # TACBI attention visualizations
-├── docs/                       # Documentation & figures
-└── requirements.txt            # Python dependencies
+│   ├── datasets/                    # PanNuke, CoNSeP, MoNuSeg loaders
+│   ├── trainer/                     # Training loops
+│   └── utils/                       # Metrics, post-processing
+├── base_ml/                         # ML utilities
+├── preprocessing/                   # WSI patch extraction
+├── configs/                         # Experiment configurations
+├── tacbi_visualization/             # TACBI attention visualizations
+└── docs/                            # Documentation figures
 ```
 
 ---
 
-## Results
+## Model Variants
 
-### PanNuke (3-fold cross-validation)
-
-| Method | mPQ | bPQ | mF1,d |
-|--------|-----|-----|-------|
-| HoVer-Net | - | - | - |
-| CellViT | 0.510 | 0.680 | 0.830 |
-| CellViT++ | 0.513 | 0.683 | - |
-| **TCINet** | **0.519** | **0.692** | - |
-
-### Zero-shot Generalization
-
-| Dataset | F1,d |
-|---------|------|
-| MoNuSeg | 0.876 |
-| CoNSeP | - |
-
----
-
-## Ablation Studies
-
-| Variant | LKCellBlock | Boundary Loss | TC-TACBI | TSFA | mPQ |
-|---------|:-----------:|:-------------:|:--------:|:----:|-----|
-| A (Baseline) | | | | | - |
-| B (LKCell) | ✓ | | | | - |
-| C (Boundary) | ✓ | ✓ | | | - |
-| **D (TCINet)** | ✓ | ✓ | ✓ | | **0.519** |
-| E (Full TACNet) | ✓ | ✓ | ✓ | ✓ | - |
+| Variant | LKCellBlock | Boundary Loss | TC-TACBI | TSFA |
+|---------|:-----------:|:-------------:|:--------:|:----:|
+| Baseline | | | | |
+| + LKCell | ✓ | | | |
+| + Boundary | ✓ | ✓ | | |
+| **TCINet** | ✓ | ✓ | ✓ | |
+| Full TACNet | ✓ | ✓ | ✓ | ✓ |
 
 ---
 
 ## Citation
 
-If you find TCINet useful in your research, please cite our paper:
-
 ```bibtex
 @article{TCINet2026,
     title   = {TCINet: Tissue-Conditioned Adaptive Cross-Branch Interaction Network for Nuclei Instance Segmentation},
-    author  = {Qian Zhenghang},
-    journal = {},
+    author  = {Qian, Zhenghang},
     year    = {2026},
     note    = {Preprint}
 }
 ```
 
-We also acknowledge the CellViT backbone:
+## Acknowledgments
+
+TCINet builds upon and extends the CellViT architecture. We thank the CellViT authors for their open-source contribution:
 
 ```bibtex
 @article{CellViT,
@@ -199,20 +153,20 @@ We also acknowledge the CellViT backbone:
     volume  = {94},
     pages   = {103143},
     year    = {2024},
-    doi     = {10.1016/j.media.2024.103143},
     author  = {Fabian Hörst and Moritz Rempe and Lukas Heine and Constantin Seibold and Julius Keyl and Giulia Baldini and Selma Ugurel and Jens Siveke and Barbara Grünwald and Jan Egger and Jens Kleesiek},
 }
 ```
+
+The SAM encoder is from Meta's Segment Anything Model (Apache 2.0 license).
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. SAM-derived components retain their original Apache 2.0 license. See [LICENSE](LICENSE) for details.
 
 ---
 
 ## Contact
 
-For questions and feedback, please contact: 1094581352@qq.com or open an issue.
-
+For questions: 1094581352@qq.com  |  Open an issue on GitHub.

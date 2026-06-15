@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT Inference Method for Patch-Wise Inference on MoNuSeg dataset
+﻿# -*- coding: utf-8 -*-
+# TCINet Inference Method for Patch-Wise Inference on MoNuSeg dataset
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
 # Institute for Artifical Intelligence in Medicine,
@@ -51,17 +51,17 @@ from cell_segmentation.utils.metrics import (
     get_fast_pq,
     remap_label,
 )
-from cell_segmentation.utils.post_proc_cellvit import calculate_instances
+from cell_segmentation.utils.post_proc_TCINet import calculate_instances
 from cell_segmentation.utils.tools import pair_coordinates
-from models.cellvit_tacnet_v2 import (
-    CellViT,
-    CellViT256,
-    CellViTSAM,
+from models.TCINet_tacnet_v2 import (
+    TCINet,
+    TCINet256,
+    TCINetSAM,
 )
-from models.segmentation.cell_segmentation.cellvit_shared import (
-    CellViT256Shared,
-    CellViTSAMShared,
-    CellViTShared,
+from models.segmentation.cell_segmentation.TCINet_shared import (
+    TCINet256Shared,
+    TCINetSAMShared,
+    TCINetShared,
 )
 from utils.logger import Logger
 from utils.tools import unflatten_dict
@@ -150,39 +150,39 @@ class MoNuSegInference:
     def __get_model(
         self, model_type: str
     ) -> Union[
-        CellViT,
-        CellViTShared,
-        CellViT256,
-        CellViT256Shared,
-        CellViTSAM,
-        CellViTSAMShared,
+        TCINet,
+        TCINetShared,
+        TCINet256,
+        TCINet256Shared,
+        TCINetSAM,
+        TCINetSAMShared,
     ]:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared
+                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[CellViT, CellViTShared, CellViT256, CellViTShared, CellViTSAM, CellViTSAMShared]: Model
+            Union[TCINet, TCINetShared, TCINet256, TCINetShared, TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
-            "CellViT",
-            "CellViTShared",
-            "CellViT256",
-            "CellViT256Shared",
-            "CellViTSAM",
-            "CellViTSAMShared",
+            "TCINet",
+            "TCINetShared",
+            "TCINet256",
+            "TCINet256Shared",
+            "TCINetSAM",
+            "TCINetSAMShared",
         ]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViT", "CellViTShared"]:
-            if model_type == "CellViT":
-                model_class = CellViT
-            elif model_type == "CellViTShared":
-                model_class = CellViTShared
+        if model_type in ["TCINet", "TCINetShared"]:
+            if model_type == "TCINet":
+                model_class = TCINet
+            elif model_type == "TCINetShared":
+                model_class = TCINetShared
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -194,22 +194,22 @@ class MoNuSegInference:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["CellViT256", "CellViT256Shared"]:
-            if model_type == "CellViT256":
-                model_class = CellViT256
-            elif model_type == "CellViT256Shared":
-                model_class = CellViT256Shared
+        elif model_type in ["TCINet256", "TCINet256Shared"]:
+            if model_type == "TCINet256":
+                model_class = TCINet256
+            elif model_type == "TCINet256Shared":
+                model_class = TCINet256Shared
             model = model_class(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
-        elif model_type in ["CellViTSAM", "CellViTSAMShared"]:
-            if model_type == "CellViTSAM":
-                model_class = CellViTSAM
-            elif model_type == "CellViTSAMShared":
-                model_class = CellViTSAMShared
+        elif model_type in ["TCINetSAM", "TCINetSAMShared"]:
+            if model_type == "TCINetSAM":
+                model_class = TCINetSAM
+            elif model_type == "TCINetSAMShared":
+                model_class = TCINetSAMShared
             model = model_class(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -971,18 +971,18 @@ class MoNuSegInference:
 
 
 # CLI
-class InferenceCellViTMoNuSegParser:
+class InferenceTCINetMoNuSegParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for MoNuSeg dataset",
+            description="Perform TCINet inference for MoNuSeg dataset",
         )
 
         parser.add_argument(
             "--model",
             type=str,
             help="Model checkpoint file that is used for inference",
-            default="/homes/fhoerst/histo-projects/CellViT/results/PanNuke/Revision/CellViT/Common-Loss/SAM-H/x20/Fold-1-x20/checkpoints/latest_checkpoint.pth",
+            default="/homes/fhoerst/histo-projects/TCINet/results/PanNuke/Revision/TCINet/Common-Loss/SAM-H/x20/Fold-1-x20/checkpoints/latest_checkpoint.pth",
         )
         parser.add_argument(
             "--dataset",
@@ -994,7 +994,7 @@ class InferenceCellViTMoNuSegParser:
             "--outdir",
             type=str,
             help="Path to output directory to store results.",
-            default="/homes/fhoerst/histo-projects/CellViT/results/PanNuke/Revision/CellViT/Common-Loss/SAM-H/x20/Fold-1-x20/MoNuSeg/x40/256_64",
+            default="/homes/fhoerst/histo-projects/TCINet/results/PanNuke/Revision/TCINet/Common-Loss/SAM-H/x20/Fold-1-x20/MoNuSeg/x40/256_64",
         )
         parser.add_argument(
             "--gpu", type=int, help="Cuda-GPU ID for inference. Default: 0", default=0
@@ -1033,7 +1033,7 @@ class InferenceCellViTMoNuSegParser:
 
 
 if __name__ == "__main__":
-    configuration_parser = InferenceCellViTMoNuSegParser()
+    configuration_parser = InferenceTCINetMoNuSegParser()
     configuration = configuration_parser.parse_arguments()
     print(configuration)
 

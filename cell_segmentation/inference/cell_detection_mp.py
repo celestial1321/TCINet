@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT Inference Method for Patch-Wise Inference on a patches test set/Whole WSI
+﻿# -*- coding: utf-8 -*-
+# TCINet Inference Method for Patch-Wise Inference on a patches test set/Whole WSI
 #
 # Detect Cells with our Networks
 # Patches dataset needs to have the follwoing requirements:
@@ -33,7 +33,7 @@ sys.path.insert(0, parentdir)
 parentdir = os.path.dirname(parentdir)
 sys.path.insert(0, parentdir)
 
-from cellvit.cell_segmentation.utils.post_proc import DetectionCellPostProcessor
+from TCINet.cell_segmentation.utils.post_proc import DetectionCellPostProcessor
 
 
 import argparse
@@ -63,24 +63,24 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
 #from torch.profiler import profile, record_function, ProfilerActivity
 
-from cellvit.cell_segmentation.datasets.cell_graph_datamodel import CellGraphDataWSI
-from cellvit.cell_segmentation.utils.template_geojson import (
+from TCINet.cell_segmentation.datasets.cell_graph_datamodel import CellGraphDataWSI
+from TCINet.cell_segmentation.utils.template_geojson import (
     get_template_point,
     get_template_segmentation,
 )
-from cellvit.datamodel.wsi_datamodel import WSI
-from cellvit.models.segmentation.cell_segmentation.cellvit import (
-    CellViT,
-    CellViT256,
-    CellViT256Unshared,
-    CellViTSAM,
-    CellViTSAMUnshared,
-    CellViTUnshared,
+from TCINet.datamodel.wsi_datamodel import WSI
+from TCINet.models.segmentation.cell_segmentation.TCINet import (
+    TCINet,
+    TCINet256,
+    TCINet256Unshared,
+    TCINetSAM,
+    TCINetSAMUnshared,
+    TCINetUnshared,
 )
-from cellvit.preprocessing.encoding.datasets.patched_wsi_inference import PatchedWSIInference
-from cellvit.utils.file_handling import load_wsi_files_from_csv
-from cellvit.utils.logger import Logger
-from cellvit.utils.tools import unflatten_dict
+from TCINet.preprocessing.encoding.datasets.patched_wsi_inference import PatchedWSIInference
+from TCINet.utils.file_handling import load_wsi_files_from_csv
+from TCINet.utils.logger import Logger
+from TCINet.utils.tools import unflatten_dict
 
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 #pandarallel.initialize(progress_bar=False, nb_workers=12)
@@ -627,39 +627,39 @@ class CellSegmentationInference:
     def __get_model(
         self, model_type: str
     ) -> Union[
-        CellViT,
-        CellViTUnshared,
-        CellViT256,
-        CellViTUnshared,
-        CellViTSAM,
-        CellViTSAMUnshared,
+        TCINet,
+        TCINetUnshared,
+        TCINet256,
+        TCINetUnshared,
+        TCINetSAM,
+        TCINetSAMUnshared,
     ]:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViT, CellViTUnshared, CellViT256, CellViT256Unshared, CellViTSAM, CellViTSAMUnshared
+                TCINet, TCINetUnshared, TCINet256, TCINet256Unshared, TCINetSAM, TCINetSAMUnshared
 
         Returns:
-            Union[CellViT, CellViTUnshared, CellViT256, CellViT256Unshared, CellViTSAM, CellViTSAMUnshared]: Model
+            Union[TCINet, TCINetUnshared, TCINet256, TCINet256Unshared, TCINetSAM, TCINetSAMUnshared]: Model
         """
         implemented_models = [
-            "CellViT",
-            "CellViTUnshared",
-            "CellViT256",
-            "CellViT256Unshared",
-            "CellViTSAM",
-            "CellViTSAMUnshared",
+            "TCINet",
+            "TCINetUnshared",
+            "TCINet256",
+            "TCINet256Unshared",
+            "TCINetSAM",
+            "TCINetSAMUnshared",
         ]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViT", "CellViTUnshared"]:
-            if model_type == "CellViT":
-                model_class = CellViT
-            elif model_type == "CellViTUnshared":
-                model_class = CellViTUnshared
+        if model_type in ["TCINet", "TCINetUnshared"]:
+            if model_type == "TCINet":
+                model_class = TCINet
+            elif model_type == "TCINetUnshared":
+                model_class = TCINetUnshared
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -670,21 +670,21 @@ class CellSegmentationInference:
                 extract_layers=self.run_conf["model"]["extract_layers"],
             )
 
-        elif model_type in ["CellViT256", "CellViT256Unshared"]:
-            if model_type == "CellViT256":
-                model_class = CellViT256
-            elif model_type == "CellViTVIT256Unshared":
-                model_class = CellViT256Unshared
+        elif model_type in ["TCINet256", "TCINet256Unshared"]:
+            if model_type == "TCINet256":
+                model_class = TCINet256
+            elif model_type == "TCINetVIT256Unshared":
+                model_class = TCINet256Unshared
             model = model_class(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
             )
-        elif model_type in ["CellViTSAM", "CellViTSAMUnshared"]:
-            if model_type == "CellViTSAM":
-                model_class = CellViTSAM
-            elif model_type == "CellViTSAMUnshared":
-                model_class = CellViTSAMUnshared
+        elif model_type in ["TCINetSAM", "TCINetSAMUnshared"]:
+            if model_type == "TCINetSAM":
+                model_class = TCINetSAM
+            elif model_type == "TCINetSAMUnshared":
+                model_class = TCINetSAMUnshared
             model = model_class(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -1301,7 +1301,7 @@ class InferenceWSIParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for given run-directory with model checkpoints and logs",
+            description="Perform TCINet inference for given run-directory with model checkpoints and logs",
         )
         requiredNamed = parser.add_argument_group("required named arguments")
         requiredNamed.add_argument(

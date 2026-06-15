@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """Alpha可视化 v7：所有图片，无小字注释，干净布局"""
 
 import os, sys
-sys.path.insert(0, '/root/autodl-tmp/CellViT-main1')
+sys.path.insert(0, '/root/autodl-tmp/TCINet-main1')
 
 import numpy as np
 import torch
@@ -16,12 +16,12 @@ from pathlib import Path
 from PIL import Image
 from collections import defaultdict
 
-from models.segmentation.cell_segmentation.cellvit import CellViTSAM
+from models.segmentation.cell_segmentation.TCINet import TCINetSAM
 
-TCINET_CKPT = '/root/autodl-tmp/CellViT-main1/logs/2026-04-24T231538_cellvit_tacnet_v2_bw8_fold0/checkpoints/model_best_bpq.pth'
-TCINET_CFG  = '/root/autodl-tmp/CellViT-main1/logs/2026-04-24T231538_cellvit_tacnet_v2_bw8_fold0/config.yaml'
-DATA_ROOT   = Path('/root/autodl-tmp/CellViT-main/cell_segmentation/datasets/PanNuke_pre')
-OUT_DIR     = Path('/root/autodl-tmp/CellViT-main1/tacbi_visualization')
+TCINET_CKPT = '/root/autodl-tmp/TCINet-main1/logs/2026-04-24T231538_TCINet_tacnet_v2_bw8_fold0/checkpoints/model_best_bpq.pth'
+TCINET_CFG  = '/root/autodl-tmp/TCINet-main1/logs/2026-04-24T231538_TCINet_tacnet_v2_bw8_fold0/config.yaml'
+DATA_ROOT   = Path('/root/autodl-tmp/TCINet-main/cell_segmentation/datasets/PanNuke_pre')
+OUT_DIR     = Path('/root/autodl-tmp/TCINet-main1/tacbi_visualization')
 OUT_DIR.mkdir(exist_ok=True)
 DEVICE = 'cuda:0'
 MEAN = np.array([0.5, 0.5, 0.5])
@@ -72,7 +72,7 @@ def get_tissue_rows(df, tissue_name):
 def load_model():
     with open(TCINET_CFG) as f:
         cfg = yaml.safe_load(f)
-    m = CellViTSAM(
+    m = TCINetSAM(
         model_path=None,
         num_nuclei_classes=cfg['data']['num_nuclei_classes'],
         num_tissue_classes=cfg['data']['num_tissue_classes'],

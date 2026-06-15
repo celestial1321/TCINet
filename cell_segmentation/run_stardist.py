@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # Running an Experiment Using StarDist cell segmentation network
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -17,11 +17,11 @@ import wandb
 
 from base_ml.base_cli import ExperimentBaseParser
 from cell_segmentation.experiments.experiment_stardist_pannuke import (
-    ExperimentCellViTStarDist,
+    ExperimentTCINetStarDist,
 )
 
 from cell_segmentation.inference.inference_stardist_experiment_pannuke import (
-    InferenceCellViTStarDist,
+    InferenceTCINetStarDist,
 )
 
 if __name__ == "__main__":
@@ -32,11 +32,11 @@ if __name__ == "__main__":
     # Setup experiment
     if "checkpoint" in configuration:
         # continue checkpoint
-        experiment = ExperimentCellViTStarDist(
+        experiment = ExperimentTCINetStarDist(
             default_conf=configuration, checkpoint=configuration["checkpoint"]
         )
         outdir = experiment.run_experiment()
-        inference = InferenceCellViTStarDist(
+        inference = InferenceTCINetStarDist(
             run_dir=outdir,
             gpu=configuration["gpu"],
             checkpoint_name=configuration["eval_checkpoint"],
@@ -51,10 +51,10 @@ if __name__ == "__main__":
             trained_model, inference_dataloader, dataset_config
         )
     else:
-        experiment = ExperimentCellViTStarDist(default_conf=configuration)
+        experiment = ExperimentTCINetStarDist(default_conf=configuration)
         if configuration["run_sweep"] is True:
             # run new sweep
-            sweep_configuration = ExperimentCellViTStarDist.extract_sweep_arguments(
+            sweep_configuration = ExperimentTCINetStarDist.extract_sweep_arguments(
                 configuration
             )
             os.environ["WANDB_DIR"] = os.path.abspath(
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         else:
             # casual run
             outdir = experiment.run_experiment()
-            inference = InferenceCellViTStarDist(
+            inference = InferenceTCINetStarDist(
                 run_dir=outdir,
                 gpu=configuration["gpu"],
                 checkpoint_name=configuration["eval_checkpoint"],

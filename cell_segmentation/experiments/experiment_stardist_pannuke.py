@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # StarDist Experiment Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -35,24 +35,24 @@ from torch.utils.data import Dataset
 from torchinfo import summary
 
 from base_ml.base_loss import retrieve_loss_fn
-from cell_segmentation.experiments.experiment_cellvit_pannuke import (
-    ExperimentCellVitPanNuke,
+from cell_segmentation.experiments.experiment_TCINet_pannuke import (
+    ExperimentTCINetPanNuke,
 )
-from cell_segmentation.trainer.trainer_stardist import CellViTStarDistTrainer
-from models.segmentation.cell_segmentation.cellvit_stardist import (
-    CellViTStarDist,
-    CellViT256StarDist,
-    CellViTSAMStarDist,
+from cell_segmentation.trainer.trainer_stardist import TCINetStarDistTrainer
+from models.segmentation.cell_segmentation.TCINet_stardist import (
+    TCINetStarDist,
+    TCINet256StarDist,
+    TCINetSAMStarDist,
 )
-from models.segmentation.cell_segmentation.cellvit_stardist_shared import (
-    CellViTStarDistShared,
-    CellViT256StarDistShared,
-    CellViTSAMStarDistShared,
+from models.segmentation.cell_segmentation.TCINet_stardist_shared import (
+    TCINetStarDistShared,
+    TCINet256StarDistShared,
+    TCINetSAMStarDistShared,
 )
 from models.segmentation.cell_segmentation.cpp_net_stardist_rn50 import StarDistRN50
 
 
-class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
+class ExperimentTCINetStarDist(ExperimentTCINetPanNuke):
     def load_dataset_setup(self, dataset_path: Union[Path, str]) -> None:
         """Load the configuration of the PanNuke cell segmentation dataset.
 
@@ -84,7 +84,7 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
 
             If a branch is not provided, the defaults settings (described below) are used.
 
-            For further information, please have a look at the file configs/examples/cell_segmentation/train_cellvit.yaml
+            For further information, please have a look at the file configs/examples/cell_segmentation/train_TCINet.yaml
             under the section "loss"
 
             Example:
@@ -182,7 +182,7 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
         return loss_fn_dict
 
     def get_scheduler(self, scheduler_type: str, optimizer: Optimizer) -> _LRScheduler:
-        """Get the learning rate scheduler for CellViT
+        """Get the learning rate scheduler for TCINet
 
         The configuration of the scheduler is given in the "training" -> "scheduler" section.
         Currenlty, "constant", "exponential" and "cosine" schedulers are implemented.
@@ -277,7 +277,7 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
         shared_decoders: bool = False,
         **kwargs,
     ) -> nn.Module:
-        """Return the CellViTStarDist training model
+        """Return the TCINetStarDist training model
 
         Args:
             pretrained_encoder (Union[Path, str]): Path to a pretrained encoder. Defaults to None.
@@ -299,9 +299,9 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
             )
         if backbone_type.lower() == "default":
             if shared_decoders:
-                model_class = CellViTStarDistShared
+                model_class = TCINetStarDistShared
             else:
-                model_class = CellViTStarDist
+                model_class = TCINetStarDist
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -318,17 +318,17 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
 
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model)
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
-                self.logger.info("Loaded CellViT model")
+                TCINet_pretrained = torch.load(pretrained_model)
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
+                self.logger.info("Loaded TCINet model")
 
         if backbone_type.lower() == "vit256":
             if shared_decoders:
-                model_class = CellViT256StarDistShared
+                model_class = TCINet256StarDistShared
             else:
-                model_class = CellViT256StarDist
+                model_class = TCINet256StarDist
             model = model_class(
                 model256_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -341,17 +341,17 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
             model.load_pretrained_encoder(model.model256_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info("Loaded CellVit256 model")
+            self.logger.info("Loaded TCINet256 model")
         if backbone_type.lower() in ["sam-b", "sam-l", "sam-h"]:
             if shared_decoders:
-                model_class = CellViTSAMStarDistShared
+                model_class = TCINetSAMStarDistShared
             else:
-                model_class = CellViTSAMStarDist
+                model_class = TCINetSAMStarDist
             model = model_class(
                 model_path=pretrained_encoder,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -363,12 +363,12 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
             model.load_pretrained_encoder(model.model_path)
             if pretrained_model is not None:
                 self.logger.info(
-                    f"Loading pretrained CellViT model from path: {pretrained_model}"
+                    f"Loading pretrained TCINet model from path: {pretrained_model}"
                 )
-                cellvit_pretrained = torch.load(pretrained_model, map_location="cpu")
-                self.logger.info(model.load_state_dict(cellvit_pretrained, strict=True))
+                TCINet_pretrained = torch.load(pretrained_model, map_location="cpu")
+                self.logger.info(model.load_state_dict(TCINet_pretrained, strict=True))
             model.freeze_encoder()
-            self.logger.info(f"Loaded CellViT-SAM model with backbone: {backbone_type}")
+            self.logger.info(f"Loaded TCINet-SAM model with backbone: {backbone_type}")
         if backbone_type.lower() == "rn50":
             model = StarDistRN50(
                 n_rays=self.run_conf["model"].get("nrays", 32),
@@ -389,4 +389,4 @@ class ExperimentCellViTStarDist(ExperimentCellVitPanNuke):
         Returns:
             BaseTrainer: Trainer
         """
-        return CellViTStarDistTrainer
+        return TCINetStarDistTrainer

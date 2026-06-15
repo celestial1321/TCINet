@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from einops import rearrange
 from models.encoders.VIT.SAM.image_encoder import ImageEncoderViT
 from models.encoders.VIT.vits_histo import VisionTransformer
@@ -86,7 +86,7 @@ class Deconv2DBlock(nn.Module):
         return self.block(x)
 
 
-class ViTCellViT(VisionTransformer):
+class ViTTCINet(VisionTransformer):
     def __init__(
         self,
         extract_layers: List[int],
@@ -174,7 +174,7 @@ class ViTCellViT(VisionTransformer):
         return output, x[:, 0], extracted_layers
 
 
-class ViTCellViTDeit(ImageEncoderViT):
+class ViTTCINetDeit(ImageEncoderViT):
     def __init__(
         self,
         extract_layers: List[int],

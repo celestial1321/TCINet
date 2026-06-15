@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # StarDist Trainer Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -21,23 +21,23 @@ from torch.optim.lr_scheduler import _LRScheduler
 from torchmetrics.functional import dice
 from torchmetrics.functional.classification import binary_jaccard_index
 from base_ml.base_early_stopping import EarlyStopping
-from models.segmentation.cell_segmentation.cellvit_stardist import (
+from models.segmentation.cell_segmentation.TCINet_stardist import (
     DataclassStarDistStorage,
 )
 
-from cell_segmentation.trainer.trainer_cellvit import CellViTTrainer
+from cell_segmentation.trainer.trainer_TCINet import TCINetTrainer
 from cell_segmentation.utils.metrics import get_fast_pq, remap_label
-from models.segmentation.cell_segmentation.cellvit import CellViT
+from models.segmentation.cell_segmentation.TCINet import TCINet
 
 # import warnings
 # warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-class CellViTStarDistTrainer(CellViTTrainer):
-    """CellViTStarDist trainer class
+class TCINetStarDistTrainer(TCINetTrainer):
+    """TCINetStarDist trainer class
 
     Args:
-        model (CellViTStarDist): CellViTStarDist model that should be trained
+        model (TCINetStarDist): TCINetStarDist model that should be trained
         loss_fn_dict (dict): Dictionary with loss functions for each branch with a dictionary of loss functions.
             Name of branch as top-level key, followed by a dictionary with loss name, loss fn and weighting factor
             Example:
@@ -70,7 +70,7 @@ class CellViTStarDistTrainer(CellViTTrainer):
 
     def __init__(
         self,
-        model: CellViT,
+        model: TCINet,
         loss_fn_dict: dict,
         optimizer: Optimizer,
         scheduler: _LRScheduler,

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # Prepare MoNuSeg Dataset By converting and resorting files
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -69,7 +69,7 @@ def process_fold(fold, input_path, output_path) -> None:
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    description="Perform CellViT inference for given run-directory with model checkpoints and logs",
+    description="Perform TCINet inference for given run-directory with model checkpoints and logs",
 )
 parser.add_argument(
     "--input_path",

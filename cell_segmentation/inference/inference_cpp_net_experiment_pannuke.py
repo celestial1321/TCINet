@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # StarDist Inference Method for Patch-Wise Inference on a test set
 # Without merging WSI
 #
@@ -30,33 +30,33 @@ from collections import OrderedDict
 import torch.nn.functional as F
 
 from cell_segmentation.inference.inference_stardist_experiment_pannuke import (
-    InferenceCellViTStarDist,
+    InferenceTCINetStarDist,
 )
-from models.segmentation.cell_segmentation.cellvit_cpp_net import (
-    CellViTCPP,
-    CellViT256CPP,
-    CellViTSAMCPP,
+from models.segmentation.cell_segmentation.TCINet_cpp_net import (
+    TCINetCPP,
+    TCINet256CPP,
+    TCINetSAMCPP,
 )
 
 
-class InferenceCellViTCPP(InferenceCellViTStarDist):
-    def get_model(self, model_type: str) -> CellViTCPP:
+class InferenceTCINetCPP(InferenceTCINetStarDist):
+    def get_model(self, model_type: str) -> TCINetCPP:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViTCPP, CellViT256CPP, CellViTSAMCPP
+                TCINetCPP, TCINet256CPP, TCINetSAMCPP
 
         Returns:
-            CellViTCPP: Model
+            TCINetCPP: Model
         """
-        implemented_models = ["CellViTCPP", "CellViT256CPP", "CellViTSAMCPP"]
+        implemented_models = ["TCINetCPP", "TCINet256CPP", "TCINetSAMCPP"]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViTCPP"]:
-            model = CellViTCPP(
+        if model_type in ["TCINetCPP"]:
+            model = TCINetCPP(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 embed_dim=self.run_conf["model"]["embed_dim"],
@@ -70,8 +70,8 @@ class InferenceCellViTCPP(InferenceCellViTStarDist):
                 nrays=self.run_conf["model"].get("nrays", 32),
             )
 
-        elif model_type in ["CellViT256CPP"]:
-            model = CellViT256CPP(
+        elif model_type in ["TCINet256CPP"]:
+            model = TCINet256CPP(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -80,8 +80,8 @@ class InferenceCellViTCPP(InferenceCellViTStarDist):
                 drop_path_rate=self.run_conf["training"].get("drop_path_rate", 0),
                 nrays=self.run_conf["model"].get("nrays", 32),
             )
-        elif model_type in ["CellViTSAMCPP"]:
-            model = CellViTSAMCPP(
+        elif model_type in ["TCINetSAMCPP"]:
+            model = TCINetSAMCPP(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -92,7 +92,7 @@ class InferenceCellViTCPP(InferenceCellViTStarDist):
 
         return model
 
-    def unpack_predictions(self, predictions: dict, model: CellViTCPP) -> OrderedDict:
+    def unpack_predictions(self, predictions: dict, model: TCINetCPP) -> OrderedDict:
         """Unpack the given predictions. Main focus lays on reshaping and postprocessing predictions, e.g. separating instances
 
         Args:
@@ -101,7 +101,7 @@ class InferenceCellViTCPP(InferenceCellViTStarDist):
                 * stardist_map: Stardist output for vector prediction. Shape: (batch_size, n_rays, H, W)
                 * dist_map: Logit output for distance map. Shape: (batch_size, 1, H, W)
                 * nuclei_type_map: Logit output for nuclei instance-prediction. Shape: (batch_size, num_nuclei_classes, H, W)
-            model (CellViTStarDist): model
+            model (TCINetStarDist): model
 
         Returns:
             OrderedDict: Processed network output. Keys are:
@@ -136,17 +136,17 @@ class InferenceCellViTCPP(InferenceCellViTStarDist):
 
 
 # CLI
-class InferenceCellViTParser:
+class InferenceTCINetParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for given run-directory with model checkpoints and logs",
+            description="Perform TCINet inference for given run-directory with model checkpoints and logs",
         )
 
         parser.add_argument(
             "--run_dir",
             type=str,
-            default="/homes/fhoerst/histo-projects/CellViT/results/PanNuke/Revision/CellViTStarDist/Common-Loss/SAM-H/Shared-decoder/CPP-Net-Setting/2023-09-17T065947_CellViTSAMStarDist-H-Shared-Fold-3",  # TODO: remove
+            default="/homes/fhoerst/histo-projects/TCINet/results/PanNuke/Revision/TCINetStarDist/Common-Loss/SAM-H/Shared-decoder/CPP-Net-Setting/2023-09-17T065947_TCINetSAMStarDist-H-Shared-Fold-3",  # TODO: remove
             help="Logging directory of a training run.",
             # required=True,
         )
@@ -177,10 +177,10 @@ class InferenceCellViTParser:
 
 
 if __name__ == "__main__":
-    configuration_parser = InferenceCellViTParser()
+    configuration_parser = InferenceTCINetParser()
     configuration = configuration_parser.parse_arguments()
     print(configuration)
-    inf = InferenceCellViTCPP(
+    inf = InferenceTCINetCPP(
         run_dir=configuration["run_dir"],
         checkpoint_name=configuration["checkpoint_name"],
         gpu=configuration["gpu"],

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# Running an Experiment Using CellViT cell segmentation network
+﻿# -*- coding: utf-8 -*-
+# Running an Experiment Using TCINet cell segmentation network
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
 # Institute for Artifical Intelligence in Medicine,
@@ -16,15 +16,15 @@ sys.path.insert(0, parentdir)
 import wandb
 
 from base_ml.base_cli import ExperimentBaseParser
-from cell_segmentation.experiments.experiment_cellvit_pannuke import (
-    ExperimentCellVitPanNuke,
+from cell_segmentation.experiments.experiment_TCINet_pannuke import (
+    ExperimentTCINetPanNuke,
 )
-from cell_segmentation.experiments.experiment_cellvit_conic import (
-    ExperimentCellViTCoNic,
+from cell_segmentation.experiments.experiment_TCINet_conic import (
+    ExperimentTCINetCoNic,
 )
 
-from cell_segmentation.inference.inference_cellvit_experiment_pannuke import (
-    InferenceCellViT,
+from cell_segmentation.inference.inference_TCINet_experiment_pannuke import (
+    InferenceTCINet,
 )
 
 if __name__ == "__main__":
@@ -33,9 +33,9 @@ if __name__ == "__main__":
     configuration = configuration_parser.parse_arguments()
 
     if configuration["data"]["dataset"].lower() == "pannuke":
-        experiment_class = ExperimentCellVitPanNuke
+        experiment_class = ExperimentTCINetPanNuke
     elif configuration["data"]["dataset"].lower() == "conic":
-        experiment_class = ExperimentCellViTCoNic
+        experiment_class = ExperimentTCINetCoNic
     # Setup experiment
     if "checkpoint" in configuration:
         # continue checkpoint
@@ -43,7 +43,7 @@ if __name__ == "__main__":
             default_conf=configuration, checkpoint=configuration["checkpoint"]
         )
         outdir = experiment.run_experiment()
-        inference = InferenceCellViT(
+        inference = InferenceTCINet(
             run_dir=outdir,
             gpu=configuration["gpu"],
             checkpoint_name=configuration["eval_checkpoint"],
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         else:
             # casual run
             outdir = experiment.run_experiment()
-            inference = InferenceCellViT(
+            inference = InferenceTCINet(
                 run_dir=outdir,
                 gpu=configuration["gpu"],
                 checkpoint_name=configuration["eval_checkpoint"],

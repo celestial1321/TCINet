@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT Trainer Class
+﻿# -*- coding: utf-8 -*-
+# TCINet Trainer Class
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
 # Institute for Artifical Intelligence in Medicine,
@@ -27,17 +27,17 @@ from torchmetrics.functional.classification import binary_jaccard_index
 
 from base_ml.base_early_stopping import EarlyStopping
 from base_ml.base_trainer import BaseTrainer
-from models.segmentation.cell_segmentation.cellvit import DataclassHVStorage
+from models.segmentation.cell_segmentation.TCINet import DataclassHVStorage
 from cell_segmentation.utils.metrics import get_fast_pq, remap_label
 from cell_segmentation.utils.tools import cropping_center
-from models.segmentation.cell_segmentation.cellvit import CellViT
+from models.segmentation.cell_segmentation.TCINet import TCINet
 from utils.tools import AverageMeter
 
 
-class CellViTTrainer(BaseTrainer):
+class TCINetTrainer(BaseTrainer):
     def __init__(
         self,
-        model: CellViT,
+        model: TCINet,
         loss_fn_dict: dict,
         optimizer: Optimizer,
         scheduler: _LRScheduler,

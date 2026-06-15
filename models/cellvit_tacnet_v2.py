@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT-TACNet v2: Task-Aware Cross-branch Interaction Network
+﻿# -*- coding: utf-8 -*-
+# TCINet-TACNet v2: Task-Aware Cross-branch Interaction Network
 #
 # 1. TSFA（Task-Specific Feature Adapter）— skip connection 级创新
 #    - 问题：shared decoder (decoder1/2/3) 的输出对三个任务一视同仁
@@ -27,7 +27,7 @@
 #                                                                     ↑ tissue_logits 动态调控
 #    → LKCellBlock Header → Output
 #
-# @ Fabian Hörst (原版 CellViT)
+# @ Fabian Hörst (原版 TCINet)
 # TACNet v2 改进 by current user
 
 from collections import OrderedDict
@@ -40,9 +40,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from cell_segmentation.utils.post_proc_cellvit import DetectionCellPostProcessor
-from models.segmentation.cell_segmentation.utils import Conv2DBlock, Deconv2DBlock, ViTCellViT, ViTCellViTDeit
-from cell_segmentation.utils.post_proc_cellvit import (
+from cell_segmentation.utils.post_proc_TCINet import DetectionCellPostProcessor
+from models.segmentation.cell_segmentation.utils import Conv2DBlock, Deconv2DBlock, ViTTCINet, ViTTCINetDeit
+from cell_segmentation.utils.post_proc_TCINet import (
     DetectionCellPostProcessor,
     get_tissue_seed_thresh,
 )
@@ -262,10 +262,10 @@ class BoundaryWeightedBCELoss(nn.Module):
 
 
 # ============================================================================
-# 主模型：CellViT-TACNet v2
+# 主模型：TCINet-TACNet v2
 # ============================================================================
-class CellViT(nn.Module):
-    """CellViT-TACNet v2.
+class TCINet(nn.Module):
+    """TCINet-TACNet v2.
 
     架构创新：
     1. TSFA：skip connection 处的任务特定特征适配（纵向）
@@ -316,7 +316,7 @@ class CellViT(nn.Module):
         self.attn_drop_rate = attn_drop_rate
         self.drop_path_rate = drop_path_rate
 
-        self.encoder = ViTCellViT(
+        self.encoder = ViTTCINet(
             patch_size=self.patch_size,
             num_classes=self.num_tissue_classes,
             embed_dim=self.embed_dim,
@@ -533,9 +533,9 @@ class CellViT(nn.Module):
             ("decoder0_header", decoder0_header),
         ]))
 
-    # 替换 cellvit_tacnet_v2.py 中的 calculate_instance_map 方法
+    # 替换 TCINet_tacnet_v2.py 中的 calculate_instance_map 方法
 # 在文件顶部导入处加上：
-#   from cell_segmentation.utils.post_proc_cellvit import (
+#   from cell_segmentation.utils.post_proc_TCINet import (
 #       DetectionCellPostProcessor,
 #       get_tissue_seed_thresh,
 #   )
@@ -602,7 +602,7 @@ class CellViT(nn.Module):
             p.requires_grad = True
 
 
-class CellViT256(CellViT):
+class TCINet256(TCINet):
     def __init__(self, model256_path, num_nuclei_classes, num_tissue_classes,
                  drop_rate=0, attn_drop_rate=0, drop_path_rate=0, regression_loss=False):
         self.patch_size = 16
@@ -633,7 +633,7 @@ class CellViT256(CellViT):
         print(f"Loading checkpoint: {msg}")
 
 
-class CellViTSAM(CellViT):
+class TCINetSAM(TCINet):
     def __init__(self, model_path, num_nuclei_classes, num_tissue_classes,
                  vit_structure, drop_rate=0, regression_loss=False):
         if vit_structure.upper() == "SAM-B":
@@ -660,7 +660,7 @@ class CellViTSAM(CellViT):
         )
 
         self.prompt_embed_dim = 256
-        self.encoder = ViTCellViTDeit(
+        self.encoder = ViTTCINetDeit(
             extract_layers=self.extract_layers, depth=self.depth,
             embed_dim=self.embed_dim, mlp_ratio=4,
             norm_layer=partial(torch.nn.LayerNorm, eps=1e-6),

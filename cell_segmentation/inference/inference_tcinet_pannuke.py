@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT Inference Method for Patch-Wise Inference on a test set
+﻿# -*- coding: utf-8 -*-
+# TCINet Inference Method for Patch-Wise Inference on a test set
 # Without merging WSI
 #
 # Aim is to calculate metrics as defined for the PanNuke dataset
@@ -44,7 +44,7 @@ from torchmetrics.functional.classification import binary_jaccard_index
 from torchvision import transforms
 
 from cell_segmentation.datasets.dataset_coordinator import select_dataset
-from models.segmentation.cell_segmentation.cellvit import DataclassHVStorage
+from models.segmentation.cell_segmentation.TCINet import DataclassHVStorage
 from cell_segmentation.utils.metrics import (
     cell_detection_scores,
     cell_type_detection_scores,
@@ -52,22 +52,22 @@ from cell_segmentation.utils.metrics import (
     remap_label,
     binarize,
 )
-from cell_segmentation.utils.post_proc_cellvit import calculate_instances
+from cell_segmentation.utils.post_proc_TCINet import calculate_instances
 from cell_segmentation.utils.tools import cropping_center, pair_coordinates
-from models.segmentation.cell_segmentation.cellvit import (
-    CellViT,
-    CellViT256,
-    CellViTSAM,
+from models.segmentation.cell_segmentation.TCINet import (
+    TCINet,
+    TCINet256,
+    TCINetSAM,
 )
-from models.segmentation.cell_segmentation.cellvit_shared import (
-    CellViT256Shared,
-    CellViTSAMShared,
-    CellViTShared,
+from models.segmentation.cell_segmentation.TCINet_shared import (
+    TCINet256Shared,
+    TCINetSAMShared,
+    TCINetShared,
 )
 from utils.logger import Logger
 
 
-class InferenceCellViT:
+class InferenceTCINet:
     def __init__(
         self,
         run_dir: Union[Path, str],
@@ -150,39 +150,39 @@ class InferenceCellViT:
     def get_model(
         self, model_type: str
     ) -> Union[
-        CellViT,
-        CellViTShared,
-        CellViT256,
-        CellViT256Shared,
-        CellViTSAM,
-        CellViTSAMShared,
+        TCINet,
+        TCINetShared,
+        TCINet256,
+        TCINet256Shared,
+        TCINetSAM,
+        TCINetSAMShared,
     ]:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared
+                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared]: Model
+            Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
-            "CellViT",
-            "CellViTShared",
-            "CellViT256",
-            "CellViT256Shared",
-            "CellViTSAM",
-            "CellViTSAMShared",
+            "TCINet",
+            "TCINetShared",
+            "TCINet256",
+            "TCINet256Shared",
+            "TCINetSAM",
+            "TCINetSAMShared",
         ]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViT", "CellViTShared"]:
-            if model_type == "CellViT":
-                model_class = CellViT
-            elif model_type == "CellViTShared":
-                model_class = CellViTShared
+        if model_type in ["TCINet", "TCINetShared"]:
+            if model_type == "TCINet":
+                model_class = TCINet
+            elif model_type == "TCINetShared":
+                model_class = TCINetShared
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -194,22 +194,22 @@ class InferenceCellViT:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["CellViT256", "CellViT256Shared"]:
-            if model_type == "CellViT256":
-                model_class = CellViT256
-            elif model_type == "CellViT256Shared":
-                model_class = CellViT256Shared
+        elif model_type in ["TCINet256", "TCINet256Shared"]:
+            if model_type == "TCINet256":
+                model_class = TCINet256
+            elif model_type == "TCINet256Shared":
+                model_class = TCINet256Shared
             model = model_class(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
-        elif model_type in ["CellViTSAM", "CellViTSAMShared"]:
-            if model_type == "CellViTSAM":
-                model_class = CellViTSAM
-            elif model_type == "CellViTSAMShared":
-                model_class = CellViTSAMShared
+        elif model_type in ["TCINetSAM", "TCINetSAMShared"]:
+            if model_type == "TCINetSAM":
+                model_class = TCINetSAM
+            elif model_type == "TCINetSAMShared":
+                model_class = TCINetSAMShared
             model = model_class(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -223,12 +223,12 @@ class InferenceCellViT:
         self, test_folds: List[int] = None
     ) -> tuple[
         Union[
-            CellViT,
-            CellViTShared,
-            CellViT256,
-            CellViT256Shared,
-            CellViTSAM,
-            CellViTSAMShared,
+            TCINet,
+            TCINetShared,
+            TCINet256,
+            TCINet256Shared,
+            TCINetSAM,
+            TCINetSAMShared,
         ],
         DataLoader,
         dict,
@@ -239,8 +239,8 @@ class InferenceCellViT:
             test_folds (List[int], optional): Test fold to use. Otherwise defined folds from config.yaml (in run_dir) are loaded. Defaults to None.
 
         Returns:
-            tuple[Union[CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared], DataLoader, dict]:
-                Union[CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared]: Best model loaded form checkpoint
+            tuple[Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared], DataLoader, dict]:
+                Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Best model loaded form checkpoint
                 DataLoader: Inference DataLoader
                 dict: Dataset configuration. Keys are:
                     * "tissue_types": describing the present tissue types with corresponding integer
@@ -309,12 +309,12 @@ class InferenceCellViT:
     def run_patch_inference(
         self,
         model: Union[
-            CellViT,
-            CellViTShared,
-            CellViT256,
-            CellViT256Shared,
-            CellViTSAM,
-            CellViTSAMShared,
+            TCINet,
+            TCINetShared,
+            TCINet256,
+            TCINet256Shared,
+            TCINetSAM,
+            TCINetSAMShared,
         ],
         inference_dataloader: DataLoader,
         dataset_config: dict,
@@ -323,7 +323,7 @@ class InferenceCellViT:
         """Run Patch inference with given setup
 
         Args:
-            model (Union[CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared]): Model to use for inference
+            model (Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]): Model to use for inference
             inference_dataloader (DataLoader): Inference Dataloader. Must return a batch with the following structure:
                 * Images (torch.Tensor)
                 * Masks (dict)
@@ -601,12 +601,12 @@ class InferenceCellViT:
     def inference_step(
         self,
         model: Union[
-            CellViT,
-            CellViTShared,
-            CellViT256,
-            CellViT256Shared,
-            CellViTSAM,
-            CellViTSAMShared,
+            TCINet,
+            TCINetShared,
+            TCINet256,
+            TCINet256Shared,
+            TCINetSAM,
+            TCINetSAMShared,
         ],
         batch: tuple,
         generate_plots: bool = False,
@@ -614,7 +614,7 @@ class InferenceCellViT:
         """Inference step for a patch-wise batch
 
         Args:
-            model (CellViT): Model to use for inference
+            model (TCINet): Model to use for inference
             batch (tuple): Batch with the following structure:
                 * Images (torch.Tensor)
                 * Masks (dict)
@@ -654,7 +654,7 @@ class InferenceCellViT:
         return batch_metrics
 
     def unpack_predictions(
-        self, predictions: dict, model: CellViT
+        self, predictions: dict, model: TCINet
     ) -> DataclassHVStorage:
         """Unpack the given predictions. Main focus lays on reshaping and postprocessing predictions, e.g. separating instances
 
@@ -664,7 +664,7 @@ class InferenceCellViT:
                 * nuclei_binary_map: Logit output for binary nuclei prediction branch. Shape: (batch_size, H, W, 2)
                 * hv_map: Logit output for hv-prediction. Shape: (batch_size, H, W, 2)
                 * nuclei_type_map: Logit output for nuclei instance-prediction. Shape: (batch_size, num_nuclei_classes, H, W)
-            model (CellViT): Current model
+            model (TCINet): Current model
 
         Returns:
             DataclassHVStorage: Processed network output
@@ -702,7 +702,7 @@ class InferenceCellViT:
         return predictions
 
     def unpack_masks(
-        self, masks: dict, tissue_types: list, model: CellViT
+        self, masks: dict, tissue_types: list, model: TCINet
     ) -> DataclassHVStorage:
         # get ground truth values, perform one hot encoding for segmentation maps
         gt_nuclei_binary_map_onehot = (
@@ -1205,11 +1205,11 @@ class InferenceCellViT:
 
 
 # CLI
-class InferenceCellViTParser:
+class InferenceTCINetParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for given run-directory with model checkpoints and logs",
+            description="Perform TCINet inference for given run-directory with model checkpoints and logs",
         )
 
         parser.add_argument(
@@ -1250,10 +1250,10 @@ class InferenceCellViTParser:
 
 
 if __name__ == "__main__":
-    configuration_parser = InferenceCellViTParser()
+    configuration_parser = InferenceTCINetParser()
     configuration = configuration_parser.parse_arguments()
     print(configuration)
-    inf = InferenceCellViT(
+    inf = InferenceTCINet(
         run_dir=configuration["run_dir"],
         checkpoint_name=configuration["checkpoint_name"],
         gpu=configuration["gpu"],

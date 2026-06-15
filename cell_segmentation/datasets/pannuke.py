@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # PanNuke Dataset
 #
 # Dataset information: https://arxiv.org/abs/2003.10778
@@ -14,7 +14,7 @@ import sys  # remove
 from pathlib import Path
 from typing import Callable, Tuple, Union
 
-sys.path.append("/homes/fhoerst/histo-projects/CellViT/")  # remove
+sys.path.append("/homes/fhoerst/histo-projects/TCINet/")  # remove
 
 import numpy as np
 import pandas as pd

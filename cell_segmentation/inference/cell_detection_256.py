@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# CellViT Inference Method for Patch-Wise Inference on a patches test set/Whole WSI
+﻿# -*- coding: utf-8 -*-
+# TCINet Inference Method for Patch-Wise Inference on a patches test set/Whole WSI
 #
 # Detect Cells with our Networks
 # Patches dataset needs to have the follwoing requirements:
@@ -53,15 +53,15 @@ from cell_segmentation.utils.template_geojson import (
     get_template_segmentation,
 )
 from datamodel.wsi_datamodel import WSI
-from models.segmentation.cell_segmentation.cellvit import (
-    CellViT,
-    CellViT256,
-    CellViTSAM,
+from models.segmentation.cell_segmentation.TCINet import (
+    TCINet,
+    TCINet256,
+    TCINetSAM,
 )
-from models.segmentation.cell_segmentation.cellvit_shared import (
-    CellViT256Shared,
-    CellViTSAMShared,
-    CellViTShared,
+from models.segmentation.cell_segmentation.TCINet_shared import (
+    TCINet256Shared,
+    TCINetSAMShared,
+    TCINetShared,
 )
 from preprocessing.encoding.datasets.patched_wsi_inference import PatchedWSIInference
 from utils.file_handling import load_wsi_files_from_csv
@@ -143,39 +143,39 @@ class CellSegmentationInference:
     def __get_model(
         self, model_type: str
     ) -> Union[
-        CellViT,
-        CellViTShared,
-        CellViT256,
-        CellViT256Shared,
-        CellViTSAM,
-        CellViTSAMShared,
+        TCINet,
+        TCINetShared,
+        TCINet256,
+        TCINet256Shared,
+        TCINetSAM,
+        TCINetSAMShared,
     ]:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared
+                TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared
 
         Returns:
-            Union[CellViT, CellViTShared, CellViT256, CellViT256Shared, CellViTSAM, CellViTSAMShared]: Model
+            Union[TCINet, TCINetShared, TCINet256, TCINet256Shared, TCINetSAM, TCINetSAMShared]: Model
         """
         implemented_models = [
-            "CellViT",
-            "CellViTShared",
-            "CellViT256",
-            "CellViT256Shared",
-            "CellViTSAM",
-            "CellViTSAMShared",
+            "TCINet",
+            "TCINetShared",
+            "TCINet256",
+            "TCINet256Shared",
+            "TCINetSAM",
+            "TCINetSAMShared",
         ]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViT", "CellViTShared"]:
-            if model_type == "CellViT":
-                model_class = CellViT
-            elif model_type == "CellViTShared":
-                model_class = CellViTShared
+        if model_type in ["TCINet", "TCINetShared"]:
+            if model_type == "TCINet":
+                model_class = TCINet
+            elif model_type == "TCINetShared":
+                model_class = TCINetShared
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -187,22 +187,22 @@ class CellSegmentationInference:
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
 
-        elif model_type in ["CellViT256", "CellViT256Shared"]:
-            if model_type == "CellViT256":
-                model_class = CellViT256
-            elif model_type == "CellViTVIT256Shared":
-                model_class = CellViT256Shared
+        elif model_type in ["TCINet256", "TCINet256Shared"]:
+            if model_type == "TCINet256":
+                model_class = TCINet256
+            elif model_type == "TCINetVIT256Shared":
+                model_class = TCINet256Shared
             model = model_class(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
-        elif model_type in ["CellViTSAM", "CellViTSAMShared"]:
-            if model_type == "CellViTSAM":
-                model_class = CellViTSAM
-            elif model_type == "CellViTSAMShared":
-                model_class = CellViTSAMShared
+        elif model_type in ["TCINetSAM", "TCINetSAMShared"]:
+            if model_type == "TCINetSAM":
+                model_class = TCINetSAM
+            elif model_type == "TCINetSAMShared":
+                model_class = TCINetSAMShared
             model = model_class(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -902,7 +902,7 @@ class InferenceWSIParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for given run-directory with model checkpoints and logs. Just for CellViT, not for StarDist models",
+            description="Perform TCINet inference for given run-directory with model checkpoints and logs. Just for TCINet, not for StarDist models",
         )
         requiredNamed = parser.add_argument_group("required named arguments")
         requiredNamed.add_argument(

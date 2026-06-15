@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# 消融实验 B/C 组：原版 CellViT + LKCellBlock（NP+HV 双分支）
+﻿# -*- coding: utf-8 -*-
+# 消融实验 B/C 组：原版 TCINet + LKCellBlock（NP+HV 双分支）
 # B 组：配套 ablation_no_boundary_fold0.yaml（无 BoundaryLoss）
 # C 组：配套 ablation_with_boundary_fold0.yaml（有 BoundaryLoss）
 # 两组模型结构完全相同，差异仅在 config 的 loss 配置
@@ -14,8 +14,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from cell_segmentation.utils.post_proc_cellvit import DetectionCellPostProcessor
-from .utils import Conv2DBlock, Deconv2DBlock, ViTCellViT, ViTCellViTDeit
+from cell_segmentation.utils.post_proc_TCINet import DetectionCellPostProcessor
+from .utils import Conv2DBlock, Deconv2DBlock, ViTTCINet, ViTTCINetDeit
 
 
 class LKCellBlock(nn.Module):
@@ -73,7 +73,7 @@ class BoundaryWeightedBCELoss(nn.Module):
         return loss.mean()
 
 
-class CellViT(nn.Module):
+class TCINet(nn.Module):
     def __init__(
         self,
         num_nuclei_classes: int,
@@ -107,7 +107,7 @@ class CellViT(nn.Module):
         self.attn_drop_rate = attn_drop_rate
         self.drop_path_rate = drop_path_rate
 
-        self.encoder = ViTCellViT(
+        self.encoder = ViTTCINet(
             patch_size=self.patch_size, num_classes=self.num_tissue_classes,
             embed_dim=self.embed_dim, depth=self.depth, num_heads=self.num_heads,
             mlp_ratio=self.mlp_ratio, qkv_bias=self.qkv_bias,
@@ -288,7 +288,7 @@ class CellViT(nn.Module):
             p.requires_grad = True
 
 
-class CellViT256(CellViT):
+class TCINet256(TCINet):
     def __init__(self, model256_path, num_nuclei_classes, num_tissue_classes,
                  drop_rate=0, attn_drop_rate=0, drop_path_rate=0, regression_loss=False):
         self.patch_size=16; self.embed_dim=384; self.depth=12; self.num_heads=6
@@ -309,7 +309,7 @@ class CellViT256(CellViT):
         print(f"Loading checkpoint: {self.encoder.load_state_dict(state_dict, strict=False)}")
 
 
-class CellViTSAM(CellViT):
+class TCINetSAM(TCINet):
     def __init__(self, model_path, num_nuclei_classes, num_tissue_classes,
                  vit_structure, drop_rate=0, regression_loss=False):
         if vit_structure.upper() == "SAM-B": self.init_vit_b()
@@ -323,7 +323,7 @@ class CellViTSAM(CellViT):
             num_heads=self.num_heads, extract_layers=self.extract_layers, mlp_ratio=self.mlp_ratio,
             qkv_bias=self.qkv_bias, drop_rate=drop_rate, regression_loss=regression_loss)
         self.prompt_embed_dim = 256
-        self.encoder = ViTCellViTDeit(
+        self.encoder = ViTTCINetDeit(
             extract_layers=self.extract_layers, depth=self.depth, embed_dim=self.embed_dim,
             mlp_ratio=4, norm_layer=partial(torch.nn.LayerNorm, eps=1e-6),
             num_heads=self.num_heads, qkv_bias=True, use_rel_pos=True,

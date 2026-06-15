@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # Running an Experiment Using CPP-Net cell segmentation network
 #
 # @ Fabian Hörst, fabian.hoerst@uk-essen.de
@@ -17,11 +17,11 @@ import wandb
 
 from base_ml.base_cli import ExperimentBaseParser
 from cell_segmentation.experiments.experiment_cpp_net_pannuke import (
-    ExperimentCellViTCPP,
+    ExperimentTCINetCPP,
 )
 
 from cell_segmentation.inference.inference_cpp_net_experiment_pannuke import (
-    InferenceCellViTCPP,
+    InferenceTCINetCPP,
 )
 
 if __name__ == "__main__":
@@ -32,11 +32,11 @@ if __name__ == "__main__":
     # Setup experiment
     if "checkpoint" in configuration:
         # continue checkpoint
-        experiment = ExperimentCellViTCPP(
+        experiment = ExperimentTCINetCPP(
             default_conf=configuration, checkpoint=configuration["checkpoint"]
         )
         outdir = experiment.run_experiment()
-        inference = InferenceCellViTCPP(
+        inference = InferenceTCINetCPP(
             run_dir=outdir,
             gpu=configuration["gpu"],
             checkpoint_name=configuration["eval_checkpoint"],
@@ -51,10 +51,10 @@ if __name__ == "__main__":
             trained_model, inference_dataloader, dataset_config
         )
     else:
-        experiment = ExperimentCellViTCPP(default_conf=configuration)
+        experiment = ExperimentTCINetCPP(default_conf=configuration)
         if configuration["run_sweep"] is True:
             # run new sweep
-            sweep_configuration = ExperimentCellViTCPP.extract_sweep_arguments(
+            sweep_configuration = ExperimentTCINetCPP.extract_sweep_arguments(
                 configuration
             )
             os.environ["WANDB_DIR"] = os.path.abspath(
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         else:
             # casual run
             outdir = experiment.run_experiment()
-            inference = InferenceCellViTCPP(
+            inference = InferenceTCINetCPP(
                 run_dir=outdir,
                 gpu=configuration["gpu"],
                 checkpoint_name=configuration["eval_checkpoint"],

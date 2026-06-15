@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # StarDist Inference Method for Patch-Wise Inference on a test set
 # Without merging WSI
 #
@@ -42,8 +42,8 @@ from torchmetrics.functional import dice
 from torchmetrics.functional.classification import binary_jaccard_index
 
 from cell_segmentation.datasets.dataset_coordinator import select_dataset
-from cell_segmentation.inference.inference_cellvit_experiment_pannuke import (
-    InferenceCellViT,
+from cell_segmentation.inference.inference_TCINet_experiment_pannuke import (
+    InferenceTCINet,
 )
 from cell_segmentation.utils.metrics import (
     cell_detection_scores,
@@ -52,23 +52,23 @@ from cell_segmentation.utils.metrics import (
     remap_label,
     binarize,
 )
-from cell_segmentation.utils.post_proc_cellvit import calculate_instances
+from cell_segmentation.utils.post_proc_TCINet import calculate_instances
 from cell_segmentation.utils.tools import pair_coordinates
-from models.segmentation.cell_segmentation.cellvit_stardist import (
-    CellViT256StarDist,
-    CellViTSAMStarDist,
-    CellViTStarDist,
+from models.segmentation.cell_segmentation.TCINet_stardist import (
+    TCINet256StarDist,
+    TCINetSAMStarDist,
+    TCINetStarDist,
 )
-from models.segmentation.cell_segmentation.cellvit_stardist_shared import (
-    CellViT256StarDistShared,
-    CellViTSAMStarDistShared,
-    CellViTStarDistShared,
+from models.segmentation.cell_segmentation.TCINet_stardist_shared import (
+    TCINet256StarDistShared,
+    TCINetSAMStarDistShared,
+    TCINetStarDistShared,
 )
 from models.segmentation.cell_segmentation.cpp_net_stardist_rn50 import StarDistRN50
 from utils.logger import Logger
 
 
-class InferenceCellViTStarDist(InferenceCellViT):
+class InferenceTCINetStarDist(InferenceTCINet):
     def __init__(
         self,
         run_dir: Union[Path, str],
@@ -76,7 +76,7 @@ class InferenceCellViTStarDist(InferenceCellViT):
         magnification: int = 40,
         checkpoint_name: str = "model_best.pth",
     ) -> None:
-        """Inference for all CellViT models with some type of StarDist integration.
+        """Inference for all TCINet models with some type of StarDist integration.
 
         Args:
             run_dir (Union[Path, str]): logging directory with checkpoints and configs
@@ -148,34 +148,34 @@ class InferenceCellViTStarDist(InferenceCellViT):
         """Setup automated mixed precision (amp) for inference."""
         self.mixed_precision = self.run_conf["training"].get("mixed_precision", False)
 
-    def get_model(self, model_type: str) -> CellViTStarDist:
+    def get_model(self, model_type: str) -> TCINetStarDist:
         """Return the trained model for inference
 
         Args:
             model_type (str): Name of the model. Must either be one of:
-                CellViTStarDist, CellViT256StarDist, CellViTSAMStarDist, StarDistViT, StarDistViT256, StarDistViTSAM, StarDistRN50
+                TCINetStarDist, TCINet256StarDist, TCINetSAMStarDist, StarDistViT, StarDistViT256, StarDistViTSAM, StarDistRN50
 
         Returns:
-            CellViTStarDist: Model
+            TCINetStarDist: Model
         """
         implemented_models = [
-            "CellViTStarDist",
-            "CellViT256StarDist",
-            "CellViTSAMStarDist",
-            "CellViTStarDistShared",
-            "CellViT256StarDistShared",
-            "CellViTSAMStarDistShared",
+            "TCINetStarDist",
+            "TCINet256StarDist",
+            "TCINetSAMStarDist",
+            "TCINetStarDistShared",
+            "TCINet256StarDistShared",
+            "TCINetSAMStarDistShared",
             "StarDistRN50",
         ]
         if model_type not in implemented_models:
             raise NotImplementedError(
                 f"Unknown model type. Please select one of {implemented_models}"
             )
-        if model_type in ["CellViTStarDist", "CellViTStarDistShared"]:
-            if model_type == "CellViTStarDist":
-                model_class = CellViTStarDist
-            elif model_type == "CellViTStarDistShared":
-                model_class = CellViTStarDistShared
+        if model_type in ["TCINetStarDist", "TCINetStarDistShared"]:
+            if model_type == "TCINetStarDist":
+                model_class = TCINetStarDist
+            elif model_type == "TCINetStarDistShared":
+                model_class = TCINetStarDistShared
             model = model_class(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -190,11 +190,11 @@ class InferenceCellViTStarDist(InferenceCellViT):
                 nrays=self.run_conf["model"].get("nrays", 32),
             )
 
-        elif model_type in ["CellViT256StarDist", "CellViT256StarDistShared"]:
-            if model_type == "CellViT256StarDist":
-                model_class = CellViT256StarDist
-            elif model_type == "CellViT256StarDistShared":
-                model_class = CellViT256StarDistShared
+        elif model_type in ["TCINet256StarDist", "TCINet256StarDistShared"]:
+            if model_type == "TCINet256StarDist":
+                model_class = TCINet256StarDist
+            elif model_type == "TCINet256StarDistShared":
+                model_class = TCINet256StarDistShared
             model = model_class(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -204,11 +204,11 @@ class InferenceCellViTStarDist(InferenceCellViT):
                 drop_path_rate=self.run_conf["training"].get("drop_path_rate", 0),
                 nrays=self.run_conf["model"].get("nrays", 32),
             )
-        elif model_type in ["CellViTSAMStarDist", "CellViTSAMStarDistShared"]:
-            if model_type == "CellViTSAMStarDist":
-                model_class = CellViTSAMStarDist
-            elif model_type == "CellViTSAMStarDistShared":
-                model_class = CellViTSAMStarDistShared
+        elif model_type in ["TCINetSAMStarDist", "TCINetSAMStarDistShared"]:
+            if model_type == "TCINetSAMStarDist":
+                model_class = TCINetSAMStarDist
+            elif model_type == "TCINetSAMStarDistShared":
+                model_class = TCINetSAMStarDistShared
             model = model_class(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -226,15 +226,15 @@ class InferenceCellViTStarDist(InferenceCellViT):
 
     def setup_patch_inference(
         self, test_folds: List[int] = None
-    ) -> tuple[CellViTStarDist, DataLoader, dict,]:
+    ) -> tuple[TCINetStarDist, DataLoader, dict,]:
         """Setup patch inference by defining a patch-wise datalaoder and loading the model checkpoint
 
         Args:
             test_folds (List[int], optional): Test fold to use. Otherwise defined folds from config.yaml (in run_dir) are loaded. Defaults to None.
 
         Returns:
-            tuple[CellViTStarDist, DataLoader, dict]:
-                CellViTStarDist: Best model loaded form checkpoint
+            tuple[TCINetStarDist, DataLoader, dict]:
+                TCINetStarDist: Best model loaded form checkpoint
                 DataLoader: Inference DataLoader
                 dict: Dataset configuration. Keys are:
                     * "tissue_types": describing the present tissue types with corresponding integer
@@ -301,14 +301,14 @@ class InferenceCellViTStarDist(InferenceCellViT):
 
     def run_patch_inference(
         self,
-        model: CellViTStarDist,
+        model: TCINetStarDist,
         inference_dataloader: DataLoader,
         dataset_config: dict,
     ) -> None:
         """Run Patch inference with given setup
 
         Args:
-            model (CellViTStarDist): Model to use for inference
+            model (TCINetStarDist): Model to use for inference
             inference_dataloader (DataLoader): Inference Dataloader. Must return a batch with the following structure:
                 * Images (torch.Tensor)
                 * Masks (dict)
@@ -573,13 +573,13 @@ class InferenceCellViTStarDist(InferenceCellViT):
 
     def inference_step(
         self,
-        model: CellViTStarDist,
+        model: TCINetStarDist,
         batch: tuple,
     ) -> None:
         """Inference step for a patch-wise batch
 
         Args:
-            model (CellViTStarDist): Model to use for inference
+            model (TCINetStarDist): Model to use for inference
             batch (tuple): Batch with the following structure:
                 * Images (torch.Tensor)
                 * Masks (dict)
@@ -616,7 +616,7 @@ class InferenceCellViTStarDist(InferenceCellViT):
         return batch_metrics
 
     def unpack_predictions(
-        self, predictions: dict, model: CellViTStarDist
+        self, predictions: dict, model: TCINetStarDist
     ) -> OrderedDict:
         """Unpack the given predictions. Main focus lays on reshaping and postprocessing predictions, e.g. separating instances
 
@@ -626,7 +626,7 @@ class InferenceCellViTStarDist(InferenceCellViT):
                 * stardist_map: Stardist output for vector prediction. Shape: (batch_size, n_rays, H, W)
                 * dist_map: Logit output for distance map. Shape: (batch_size, 1, H, W)
                 * nuclei_type_map: Logit output for nuclei instance-prediction. Shape: (batch_size, num_nuclei_classes, H, W)
-            model (CellViTStarDist): model
+            model (TCINetStarDist): model
 
         Returns:
             OrderedDict: Processed network output. Keys are:
@@ -946,17 +946,17 @@ class InferenceCellViTStarDist(InferenceCellViT):
 
 
 # CLI
-class InferenceCellViTParser:
+class InferenceTCINetParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            description="Perform CellViT inference for given run-directory with model checkpoints and logs",
+            description="Perform TCINet inference for given run-directory with model checkpoints and logs",
         )
 
         parser.add_argument(
             "--run_dir",
             type=str,
-            default="/homes/fhoerst/histo-projects/CellViT/results/PanNuke/Revision/CellViTStarDist/Common-Loss/SAM-H/Shared-decoder/CPP-Net-Setting/2023-09-17T065947_CellViTSAMStarDist-H-Shared-Fold-3",  # TODO: remove
+            default="/homes/fhoerst/histo-projects/TCINet/results/PanNuke/Revision/TCINetStarDist/Common-Loss/SAM-H/Shared-decoder/CPP-Net-Setting/2023-09-17T065947_TCINetSAMStarDist-H-Shared-Fold-3",  # TODO: remove
             help="Logging directory of a training run.",
             # required=True,
         )
@@ -987,10 +987,10 @@ class InferenceCellViTParser:
 
 
 if __name__ == "__main__":
-    configuration_parser = InferenceCellViTParser()
+    configuration_parser = InferenceTCINetParser()
     configuration = configuration_parser.parse_arguments()
     print(configuration)
-    inf = InferenceCellViTStarDist(
+    inf = InferenceTCINetStarDist(
         run_dir=configuration["run_dir"],
         checkpoint_name=configuration["checkpoint_name"],
         gpu=configuration["gpu"],

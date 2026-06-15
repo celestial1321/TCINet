@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # Adapted from https://github.com/csccsccsccsc/cpp-net/blob/main/cppnet/models/SamplingFeatures2.py # noqa
 # File copied from cellsegmodelspytorch
 # TODO: check docstring for all models and also file strings at the beginning
@@ -17,8 +17,8 @@ import torch.nn.functional as F
 
 from cell_segmentation.utils.post_proc_stardist import StarDistPostProcessor
 
-from .cellvit import CellViT, CellViT256, CellViTSAM
-from .utils import Conv2DBlock, Deconv2DBlock, ViTCellViT, ViTCellViTDeit
+from .TCINet import TCINet, TCINet256, TCINetSAM
+from .utils import Conv2DBlock, Deconv2DBlock, ViTTCINet, ViTTCINetDeit
 
 
 def feature_sampling(
@@ -164,7 +164,7 @@ class SamplingFeatures(nn.Module):
         return sampled_features, sampling_coord, offsets
 
 
-class CellViTCPP(CellViT):
+class TCINetCPP(TCINet):
     def __init__(
         self,
         num_nuclei_classes: int,
@@ -182,7 +182,7 @@ class CellViTCPP(CellViT):
         drop_path_rate: float = 0,
         erosion_factors: Tuple[float] = (0.2, 0.4, 0.6, 0.8, 1.0),
     ):
-        super(CellViT, self).__init__()
+        super(TCINet, self).__init__()
         assert len(extract_layers) == 4, "Please provide 4 layers for skip connections"
 
         self.patch_size = 16
@@ -201,7 +201,7 @@ class CellViTCPP(CellViT):
         self.nrays = nrays
         self.prompt_embed_dim = 256
 
-        self.encoder = ViTCellViT(
+        self.encoder = ViTTCINet(
             patch_size=self.patch_size,
             num_classes=self.num_tissue_classes,
             embed_dim=self.embed_dim,
@@ -426,8 +426,8 @@ class CellViTCPP(CellViT):
         return torch.stack(instance_preds), type_preds, torch.stack(instance_type_preds)
 
 
-class CellViT256CPP(CellViTCPP, CellViT256):
-    """CellViT Modell with StarDist heads (separated decoder)
+class TCINet256CPP(TCINetCPP, TCINet256):
+    """TCINet Modell with StarDist heads (separated decoder)
     with ViT-256 backbone settings (https://github.com/mahmoodlab/HIPT/blob/master/HIPT_4K/Checkpoints/vit256_small_dino.pth)
 
     Skip connections are shared between branches, but each network has a distinct encoder
@@ -483,8 +483,8 @@ class CellViT256CPP(CellViTCPP, CellViT256):
         self.model256_path = model256_path
 
 
-class CellViTSAMCPP(CellViTCPP, CellViTSAM):
-    """CellViT Modell with StarDist heads (separated decoder) with SAM backbone settings
+class TCINetSAMCPP(TCINetCPP, TCINetSAM):
+    """TCINet Modell with StarDist heads (separated decoder) with SAM backbone settings
 
     Skip connections are shared between branches, but each network has a distinct encoder
 
@@ -540,7 +540,7 @@ class CellViTSAMCPP(CellViTCPP, CellViTSAM):
 
         self.prompt_embed_dim = 256
 
-        self.encoder = ViTCellViTDeit(
+        self.encoder = ViTTCINetDeit(
             extract_layers=self.extract_layers,
             depth=self.depth,
             embed_dim=self.embed_dim,
